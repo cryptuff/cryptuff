@@ -1,19 +1,12 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
+    "rootDir": "src",
     "outDir": "lib",
-    "rootDir": "..",
-    "sourceMap": true,
-
-    // "paths": {
-    //   "@cryptuff/*": ["../*/"]
-    // }
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "lib"],
-  // "references": [
-  //   {
-  //     "path": "../core"
-  //   }
-  // ]
+  "include": [
+    "./typings/*",
+    "./src/**/*.ts",
+    "./src/**/*.tsx"
+  ]
 }

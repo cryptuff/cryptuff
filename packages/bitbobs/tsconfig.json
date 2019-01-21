@@ -1,16 +1,17 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "es2016",
-    "skipLibCheck": false,
-    "forceConsistentCasingInFileNames": true,
+    "target": "esnext",
     "module": "esnext",
     "moduleResolution": "node",
-    "isolatedModules": true,
-    "noEmit": true,
     "jsx": "preserve",
-    "allowJs": true
+    "paths": {
+      "@components/*": [ "components/*" ],
+      "@helpers/*": [ "helpers/*" ],
+      "@cryptuff/*": ["../*"],
+      "core": ["../core"]
+    },
   },
-  "include": [
-    "src"
-  ]
+  "references": [{ "path": "../core" }]
+  // "include": ["./typings/*", "./src/**/*.ts", "./src/**/*.tsx"]
 }
