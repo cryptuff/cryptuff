@@ -1,0 +1,20 @@
+{
+  "name": "@cryptuff/core",
+  "version": "0.0.1",
+  "description": "Common classes for cryptuff business",
+  "main": "./src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cryptuff/core.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cryptuff/core/issues"
+  },
+  "homepage": "https://github.com/cryptuff/core#readme"
+}

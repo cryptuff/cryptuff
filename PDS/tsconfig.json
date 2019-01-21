@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "lib",
+    "rootDir": "..",
+    "sourceMap": true,
+
+    "paths": {
+      "@cryptuff/*": ["../*/"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "lib"],
+  // "references": [
+  //   {
+  //     "path": "../core"
+  //   }
+  // ]
+}
