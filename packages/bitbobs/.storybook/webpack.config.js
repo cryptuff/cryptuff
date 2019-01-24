@@ -18,7 +18,7 @@ module.exports = (baseConfig, env, config) => {
   );
   config.resolve.alias = {
     ...config.resolve.alias,
-    "core": path.resolve(__dirname, "../../", "core"),
+    "@core": path.resolve(__dirname, "../../", "core"),
     "@helpers": path.resolve(__dirname, "../src", "helpers"),
   };
   config.resolve.extensions.push(".ts", ".tsx");

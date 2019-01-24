@@ -7,13 +7,13 @@
   "scripts": {
     "build": "rimraf ./dist && tsc",
     "build:watch": "rimraf ./dist && tsc --watch",
+    "tscbuild": "tsc --build --watch",
     "dev": "tsc --watch & nodemon dist",
     "test": "jest"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@cryptuff/core": "latest"
   },
   "devDependencies": {}
 }

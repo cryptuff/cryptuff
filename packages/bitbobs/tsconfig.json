@@ -5,13 +5,14 @@
     "module": "esnext",
     "moduleResolution": "node",
     "jsx": "preserve",
+    "baseUrl": ".",
     "paths": {
-      "@components/*": [ "components/*" ],
-      "@helpers/*": [ "helpers/*" ],
+      "@components/*": [ "src/components/*" ],
+      "@helpers/*": [ "src/helpers/*" ],
       "@cryptuff/*": ["../*"],
-      "core": ["../core"]
+      "@core": ["../core"]
     },
   },
-  "references": [{ "path": "../core" }]
-  // "include": ["./typings/*", "./src/**/*.ts", "./src/**/*.tsx"]
+  "references": [{ "path": "../core" }],
+  "include": ["./typings/*", "./src/**/*.ts", "./src/**/*.tsx"]
 }

@@ -1,14 +1,13 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-
-    "sourceMap": true,
-    // "declarationMap": true,
-
     "module": "commonjs",
-    // "moduleResolution": "node",
+    "moduleResolution": "node",
     "target": "es2016",
     "lib": ["dom", "esnext"],
+    
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
 
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
@@ -22,14 +21,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "strict": true,
-    "pretty": true,
-
-    "composite": true,
-
-    "paths": {
-      "@cryptuff/*": ["packages/*"],
-      "core": ["packages/core"]
-    }
+    "pretty": true,    
   },
   // "include": ["src/**/*"],
   "exclude": ["node_modules", "lib"],
