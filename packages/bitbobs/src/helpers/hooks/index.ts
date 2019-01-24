@@ -1,0 +1,1 @@
+export { useRandomColor } from "./useRandomColor";

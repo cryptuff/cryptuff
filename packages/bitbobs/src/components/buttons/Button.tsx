@@ -1,12 +1,13 @@
 import React from "react";
 import styled from "styled-components";
 
-import {Core} from "core";
+import { Core } from "@core";
+import { useRandomColor } from "@helpers/hooks";
 
 type Props = {
   big: boolean;
   label?: string;
-  onClick(): void;
+  onClick?(): void;
   style?: {};
   theme: string;
 };
@@ -18,36 +19,39 @@ const StyledButton = styled.button`
   border-radius: 4px;
 
   &.primary {
-    background-color: #1585d8;
+    background-color: ${(props: Props & { bgColor: string }) => props.bgColor};
     & span {
       color: white;
     }
   }
-
-  &.secondary {
-    background-color: #eff3f6;
-    & span {
-      color: grey;
-    }
-  }
 `;
 
-const Button = (props: Props) => (
-  <StyledButton
-    big={props.big}
-    className={props.theme}
-    onClick={props.onClick}
-    style={props.style}
-  >
-    {props.label && <span>{props.label}</span>}
-    {Core}
-  </StyledButton>
-);
+const allColors = ["red", "blue", "green", "gray"];
+
+const Button = (props: Props) => {
+  const [color, changeColor] = useRandomColor(allColors, "red");
+
+  return (
+    <StyledButton
+      big={props.big}
+      className={props.theme}
+      onClick={() => {
+        changeColor();
+        props.onClick && props.onClick();
+      }}
+      bgColor={color}
+      style={props.style}
+    >
+      {props.label && <span>{props.label}</span>}
+      {Core}
+    </StyledButton>
+  );
+};
 
 Button.defaultProps = {
   big: false,
   label: undefined,
-  onClick: () => {},
+  //   onClick: () => {},
   style: {},
   theme: "primary"
 };
