@@ -5,9 +5,9 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "rimraf ./dist && tsc",
-    "build:watch": "rimraf ./dist && tsc --watch",
-    "tscbuild": "tsc --build --watch",
+    "build": "rimraf ./dist && tsc --build",
+    "build:watch": "rimraf ./dist && tsc --build --watch",
+    "tscbuild": "tsc --build",
     "dev": "tsc --watch & nodemon dist",
     "test": "jest"
   },

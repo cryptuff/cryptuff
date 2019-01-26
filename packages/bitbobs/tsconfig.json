@@ -1,11 +1,13 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "baseUrl": ".",
+
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "node",
     "jsx": "preserve",
-    "baseUrl": ".",
+    
     "paths": {
       "@components/*": [ "src/components/*" ],
       "@helpers/*": [ "src/helpers/*" ],

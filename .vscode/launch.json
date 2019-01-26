@@ -9,10 +9,8 @@
             "request": "launch",
             "name": "Launch pds",
             "console": "integratedTerminal",
-            "program": "${workspaceFolder}\\index.js",
-            "outFiles": [
-                "${workspaceFolder}/**/*.js"
-            ]
+            "program": "${workspaceFolder}/packages/pds/dist/index.js",
+            "preLaunchTask": "@@ cryptuff :: build pds"
         }
     ]
 }
