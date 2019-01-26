@@ -1,2 +1,5 @@
-export const Core = "5";
- 
+
+export * from "./interfaces";
+
+export const Core = "6";
+
