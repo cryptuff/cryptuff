@@ -1,11 +1,12 @@
 {
-    "defaultSeverity": "error",
+    "defaultSeverity": "warning",
     "extends": [
         
     ],
     "jsRules": {},
     "rules": {
-        "typedef": false
+        "typedef": false,
+        // "no-unused-variable": false,
     },
     "rulesDirectory": []
 }

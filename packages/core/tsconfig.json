@@ -1,10 +1,11 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "lib",
 
     "composite": true,
+    "module": "esnext", // Possible because this is a library and not an executable nodejs app
   },
   "include": [
     "./typings/*",
