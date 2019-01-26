@@ -1,0 +1,9 @@
+version: '3'
+services:
+  router:
+    build:
+      dockerfile: Dockerfile
+      context: ./services/router
+    ports:
+      - '38000:8000'
+    

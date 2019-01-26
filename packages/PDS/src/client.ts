@@ -1,8 +1,8 @@
 import { Connection, Session } from "autobahn";
 import { ITickerRequest, ITickerResponse } from "@core";
 
-var url = "ws://localhost:32782/ws";    //Internal port: 8080
-var realm = "cryptuff";
+var url = "ws://localhost:38000/ws";    //Internal port: 8080
+var realm = "com.cryptuff";
 var topic = "com.cryptuff.pds";
 var getTickerProcedure = "com.cryptuff.pds.getTicker";
 var tickerRequest: ITickerRequest = { exchange: "Kraken", pair: "BTCEUR"};
