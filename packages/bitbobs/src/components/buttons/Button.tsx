@@ -5,11 +5,11 @@ import { Core } from "@core";
 import { useRandomColor } from "@helpers/hooks";
 
 type Props = {
-  big: boolean;
+  big?: boolean;
   label?: string;
   onClick?(): void;
   style?: {};
-  theme: string;
+  theme?: string;
 };
 
 const StyledButton = styled.button`

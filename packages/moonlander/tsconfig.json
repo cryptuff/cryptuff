@@ -1,22 +1,27 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "baseUrl": ".",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "jsx": "preserve",
+
     "allowJs": true,
     "skipLibCheck": true,
+    "noEmit": true,
+    "isolatedModules": true,
+
+    "baseUrl": ".",
+    "lib": ["dom", "dom.iterable", "esnext"],
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "module": "esnext",
-    "moduleResolution": "node",
     "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "preserve",
     "paths": {
-      "@core": ["../core"]
+      "@components/*": ["src/components/*"],
+      "@helpers/*": ["src/helpers/*"],
+      "@core": ["../core"],
+      "@bitbobs": ["../bitbobs"]
     }
   },
   "references": [
