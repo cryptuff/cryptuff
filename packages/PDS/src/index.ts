@@ -6,7 +6,7 @@ var realm = "com.cryptuff";
 var topic = "com.cryptuff.pds";
 var getTickerProcedure = "com.cryptuff.pds.getTicker";
 
-console.log("Starting PDS server...");
+console.log("Starting pds server...");
 
 var a = 0;
 
@@ -32,7 +32,7 @@ const onopen = (async (session: Session) => {
 (async () => {
     var connection = new Connection({ url, realm });
     connection.onopen = (session: Session, details: any) => {
-        console.log("PDS server connected to router!");
+        console.log("pds server connected to router!");
         onopen(session);
     };
     connection.open();

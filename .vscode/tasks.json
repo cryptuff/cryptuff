@@ -7,7 +7,7 @@
       "label": "@@ cryptuff :: build pds",
       "type": "npm",
       "script": "tscbuild",
-      "path": "packages/PDS/",
+      "path": "packages/pds/",
       "problemMatcher": ["$tsc"],
       "group": {
         "kind": "build",

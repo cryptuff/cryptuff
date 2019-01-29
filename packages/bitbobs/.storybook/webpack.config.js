@@ -7,7 +7,7 @@ module.exports = (baseConfig, env, config) => {
       options: {
         presets: [["react-app", { flow: false, typescript: true }]]
       }
-    },
+    }
     // {
     //   test: /\.(ts|tsx)$/,
     //   use: [
@@ -18,8 +18,8 @@ module.exports = (baseConfig, env, config) => {
   );
   config.resolve.alias = {
     ...config.resolve.alias,
-    "@core": path.resolve(__dirname, "../../", "core"),
-    "@helpers": path.resolve(__dirname, "../src", "helpers"),
+    // "@core": "@cryptuff/core",
+    "@helpers": path.resolve(__dirname, "../src", "helpers")
   };
   config.resolve.extensions.push(".ts", ".tsx");
   return config;

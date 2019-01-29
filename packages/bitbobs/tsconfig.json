@@ -8,15 +8,13 @@
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "node",
-    "jsx": "preserve",
+    "jsx": "react",
 
     "composite": true,
 
     "paths": {
       "@components/*": ["src/components/*"],
-      "@helpers/*": ["src/helpers/*"],
-      "@cryptuff/*": ["../*"],
-      "@core": ["../core"]
+      "@helpers/*": ["src/helpers/*"]
     }
   },
   "references": [{ "path": "../core" }],

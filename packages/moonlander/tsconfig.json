@@ -4,13 +4,10 @@
     "module": "esnext",
     "moduleResolution": "node",
     "jsx": "preserve",
-
     "allowJs": true,
     "skipLibCheck": true,
     "noEmit": true,
     "isolatedModules": true,
-
-    "baseUrl": ".",
     "lib": ["dom", "dom.iterable", "esnext"],
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -19,9 +16,7 @@
     "resolveJsonModule": true,
     "paths": {
       "@components/*": ["src/components/*"],
-      "@helpers/*": ["src/helpers/*"],
-      "@core": ["../core"],
-      "@bitbobs": ["../bitbobs"]
+      "@helpers/*": ["src/helpers/*"]
     }
   },
   "references": [

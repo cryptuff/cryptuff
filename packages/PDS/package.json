@@ -14,11 +14,13 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@cryptuff/core": "^0.0.1",
     "autobahn": "^18.10.2",
     "tslib": "^1.9.3"
   },
   "devDependencies": {
     "@types/autobahn": "^0.9.41",
-    "@types/node": "^10.12.18"
+    "@types/node": "^10.12.18",
+    "typescript": "^3.2.4"
   }
 }

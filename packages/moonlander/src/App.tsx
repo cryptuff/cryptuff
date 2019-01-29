@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 
-import { ITickerRequest, ITickerResponse } from "@core";
+import { ITickerRequest, ITickerResponse, Core } from "@cryptuff/core";
+import { Button } from "@cryptuff/bitbobs";
 
 class App extends Component {
   render() {
@@ -20,6 +21,8 @@ class App extends Component {
             rel="noopener noreferrer"
           >
             {React.version}
+            <br />
+            <Button label={Core} onClick={() => alert("click!")} />
           </a>
         </header>
       </div>
