@@ -13,11 +13,7 @@
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "paths": {
-      "@components/*": ["src/components/*"],
-      "@helpers/*": ["src/helpers/*"]
-    }
+    "resolveJsonModule": true
   },
   "references": [
     {

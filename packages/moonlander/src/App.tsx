@@ -3,7 +3,8 @@ import logo from "./logo.svg";
 import "./App.css";
 
 import { ITickerRequest, ITickerResponse, Core } from "@cryptuff/core";
-import { Button } from "@cryptuff/bitbobs";
+// import Button from "./Button";         // This works
+import Button from "@cryptuff/bitbobs";   // This doesn't cuz 2 x react
 
 class App extends Component {
   render() {
@@ -21,9 +22,9 @@ class App extends Component {
             rel="noopener noreferrer"
           >
             {React.version}
-            <br />
-            <Button label={Core} onClick={() => alert("click!")} />
           </a>
+            <br />
+            <Button label={Core} onClick={() => { alert("click!")}} />
         </header>
       </div>
     );

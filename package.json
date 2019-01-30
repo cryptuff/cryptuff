@@ -20,9 +20,9 @@
   },
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "build": "tsc -b packages/core packages/pds",
+    "build": "lerna run build",
     "test": "lerna run test",
-    "lerna:clean": "lerna clean -y"
+    "clean": "lerna clean -y"
   },
   "husky": {
     "hooks": {
