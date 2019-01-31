@@ -8,6 +8,4 @@ If this project is used as a TS project reference, nothing needs to be done.
 
 To run it standalone run
 
-`packages/core$ npm run build:watch`
-
-
+`packages/core$ yarn run build:watch`

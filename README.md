@@ -8,6 +8,6 @@ Monorepo for all things crypto
 
    `$ lerna bootstrap`
 
-2. Build all projects (this runs npm run build in every package)
+2. Build all projects (this runs `yarn run build` in every package)
 
-   `$ npm run build`
+   `$ yarn run build`
