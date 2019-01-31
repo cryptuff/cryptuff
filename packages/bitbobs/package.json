@@ -5,16 +5,6 @@
   "main": "lib/cjs/index.js",
   "module": "lib/es/index.js",
   "types": "lib/types/index.d.ts",
-  "scripts": {
-    "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook -c .storybook -o .out",
-    "deploy-storybook": "storybook-to-ghpages",
-    "test": "jest",
-    "build": "npm run ts:check && rollup -c ./config/rollup.config.js && npm run ts:dec",
-    "ts:check": "tsc --noEmit",
-    "ts:lint": "npx tslint --project .",
-    "ts:dec": "tsc --declaration --declarationDir ./lib/types/ --emitDeclarationOnly"
-  },
   "keywords": [
     "react",
     "trading",
@@ -29,17 +19,17 @@
     "@babel/preset-env": "^7.2.3",
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.1.0",
-    "@storybook/addon-actions": "^4.1.11",
-    "@storybook/addon-centered": "^4.1.11",
-    "@storybook/addon-info": "^4.1.11",
-    "@storybook/addon-knobs": "^4.1.11",
-    "@storybook/addon-links": "^4.1.11",
-    "@storybook/addon-options": "^4.1.11",
-    "@storybook/addons": "^4.1.11",
-    "@storybook/react": "^4.1.11",
+    "@storybook/addon-actions": "4.2.0-alpha.11",
+    "@storybook/addon-centered": "4.2.0-alpha.11",
+    "@storybook/addon-info": "4.2.0-alpha.11",
+    "@storybook/addon-knobs": "4.2.0-alpha.11",
+    "@storybook/addon-links": "4.2.0-alpha.11",
+    "@storybook/addon-options": "4.2.0-alpha.11",
+    "@storybook/addons": "4.2.0-alpha.11",
+    "@storybook/react": "4.2.0-alpha.11",
     "@storybook/storybook-deployer": "^2.8.1",
-    "@types/react": "16.7.20",
-    "@types/react-dom": "16.0.11",
+    "@types/react": "^16.7.22",
+    "@types/react-dom": "^16.0.11",
     "@types/storybook__addon-actions": "^3.4.1",
     "@types/storybook__addon-centered": "^3.3.1",
     "@types/storybook__addon-knobs": "^4.0.0",
@@ -49,16 +39,16 @@
     "@types/styled-components": "^4.1.6",
     "autoprefixer": "^9.4.7",
     "awesome-typescript-loader": "^5.2.1",
-    "babel-loader": "^8.0.5",
+    "babel-loader": "8.0.4",
     "babel-plugin-add-react-displayname": "^0.0.5",
     "babel-plugin-react-docgen": "^2.0.1",
     "babel-plugin-typescript-to-proptypes": "^0.16.0",
     "postcss-flexbugs-fixes": "^4.1.0",
     "postcss-loader": "^3.0.0",
     "prop-types": "^15.6.2",
-    "react": "^16.8.0-alpha.1",
     "react-docgen-typescript-webpack-plugin": "^1.1.0",
-    "react-dom": "^16.8.0-alpha.1",
+    "react": "16.8.0-alpha.1",
+    "react-dom": "16.8.0-alpha.1",
     "rollup": "^1.1.2",
     "rollup-plugin-alias": "^1.5.1",
     "rollup-plugin-babel": "^4.3.2",
@@ -72,11 +62,28 @@
     "typescript": "^3.2.4"
   },
   "dependencies": {
-    "@cryptuff/core": "^0.0.1",
-    "styled-components": "^4.1.3"
+    "styled-components": "^4.1.3",
+    "@cryptuff/core": "^0.0.1"
   },
+  "bundleDependencies": [],
   "peerDependencies": {
-    "react": ">=16.8.0-alpha.1",
-    "react-dom": ">=16.8.0-alpha.1"
+    "@cryptuff/core": "^0.0.1",
+    "react": "16.8.0-alpha.1",
+    "react-dom": "16.8.0-alpha.1"
+  },
+  "resolutions": {
+    "react": "16.8.0-alpha.1",
+    "react-dom": "16.8.0-alpha.1"
+  },
+  "scripts": {
+    "force-resolutions": "npx npm-force-resolutions",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook -c .storybook -o dist",
+    "deploy-storybook": "storybook-to-ghpages",
+    "test": "jest",
+    "build": "npm run ts:check && rollup -c ./config/rollup.config.js && npm run ts:dec",
+    "ts:check": "tsc --noEmit",
+    "ts:lint": "npx tslint --project .",
+    "ts:dec": "tsc --declaration --declarationDir ./lib/types/ --emitDeclarationOnly"
   }
 }

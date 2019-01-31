@@ -10,6 +10,7 @@ type Props = {
   onClick?(): void;
   style?: {};
   theme?: string;
+  children?: React.ReactNode;
 };
 
 const StyledButton = styled.button`
@@ -43,7 +44,7 @@ const Button = (props: Props) => {
       style={props.style}
     >
       {props.label && <span>{props.label}</span>}
-      {Core}
+      {props.children || "no children"}
     </StyledButton>
   );
 };
