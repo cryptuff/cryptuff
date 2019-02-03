@@ -1,7 +1,6 @@
 import React from "react";
 import styled from "styled-components";
 
-import { Core, B, C } from "@cryptuff/core";
 import { useRandomColor } from "@helpers/hooks";
 
 type Props = {

@@ -1,7 +1,5 @@
 import { Connection, Session } from "autobahn";
-// import { ITickerRequest, ITickerResponse } from "@cryptuff/core";
-// import { ITickerRequest, ITickerResponse } from "../../atmcore";
-import { ITickerRequest, ITickerResponse } from "../../../../cryptuff/packages/core";
+import { ITickerRequest, ITickerResponse } from "@cryptuff/core";
 
 var url = "ws://localhost:38000/ws"; //Internal port: 8080
 var realm = "com.cryptuff";

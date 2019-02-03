@@ -4,6 +4,8 @@ import "./App.css";
 
 import { ITickerRequest, ITickerResponse, Core } from "@cryptuff/core";
 import { Button } from "@cryptuff/bitbobs"; 
+import { initClient } from "./client";
+
 
 class App extends Component {
   render() {
@@ -31,10 +33,8 @@ class App extends Component {
             </ul>
             <Button
               label={Core}
-              onClick={() => {
-                console.log("click");
-              }}
-            />
+              onClick={initClient}
+            >Init PDS client (open console)</Button>
           </header>
         </Suspense>
       </div>

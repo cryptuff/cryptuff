@@ -17,6 +17,5 @@
       "@helpers/*": ["src/helpers/*"]
     }
   },
-  "references": [{ "path": "../core" }],
   "include": ["./typings/*", "./src/**/*.ts", "./src/**/*.tsx"]
 }

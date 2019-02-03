@@ -3,16 +3,9 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "baseUrl": ".",
-    "paths": {
-      "@core": ["../core"]
-    },
+    "baseUrl": "."
   },
-  "include": [
-    "./typings/*",
-    "./src/**/*.ts",
-    "./src/**/*.tsx"
-  ],
+  "include": ["./typings/*", "./src/**/*.ts", "./src/**/*.tsx"],
   "references": [
     {
       "path": "../core"
