@@ -6,6 +6,9 @@
     "baseUrl": "."
   },
   "include": ["./typings/*", "./src/**/*.ts", "./src/**/*.tsx"],
+  "paths": {
+    "@cryptuff/*": ["../cryptuff/packages/*"]
+  },
   "references": [
     {
       "path": "../core"
