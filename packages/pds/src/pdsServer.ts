@@ -18,6 +18,8 @@ export class PDSServer {
     private serverUrl: string,
     private realm: string = CRYPTUFF_REALM
   ) {
+    console.log("Initialising pds server...");
+    
     this.routerConnection = new Connection({
       url: this.serverUrl,
       realm: this.realm

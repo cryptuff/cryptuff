@@ -1,28 +1,27 @@
-import { Connection, Session } from "autobahn";
-import { ITickerRequest, ITickerResponse } from "@cryptuff/core";
+import { Connection, Session, SubscribeHandler, IEvent } from "autobahn";
+import { ITickerRequest, ITickerResponse, Methods } from "@cryptuff/core";
 
 var url = "ws://localhost:38000/ws"; //Internal port: 8080
 var realm = "com.cryptuff";
 var topic = "com.cryptuff.pds";
-var getTickerProcedure = "com.cryptuff.pds.getTicker";
-var tickerRequest: ITickerRequest = { exchange: "Kraken", pair: "BTCEUR" };
+var exchangeInstrument = { exchange: "Kraken", instrument: "ETHUSD" };
 
 export function initClient() {
   console.log("Starting client...");
 
   function onopen(session: Session) {
-    session.subscribe(topic, args => {
-      console.log(`Received topic ${topic}: ${JSON.stringify(args)}`);
+    session.subscribe("*", (args, kwargs, details) => {
+      console.log(`Received topic ${details!.topic}:\n`, args, kwargs, details);
     });
 
     setTimeout(async () => {
-      console.log("Client requesting ticker");
-      let ticker = await session.call<ITickerResponse>(
-        getTickerProcedure,
+      console.log("Client requesting OB (RPC request)");
+      let ticker = await session.call<string>(
+        Methods.OrderBookSubscription,
         null,
-        tickerRequest,
+        exchangeInstrument
       );
-      console.log(`Ticker: ${JSON.stringify(ticker)}`);
+      console.log(`Received: ${JSON.stringify(ticker)}`);
     }, 3000);
   }
 
