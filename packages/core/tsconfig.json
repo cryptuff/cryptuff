@@ -6,11 +6,7 @@
     "outDir": "lib",
 
     "composite": true,
-    "module": "esnext", // Possible because this is a library and not an executable nodejs app
+    "module": "commonjs"
   },
-  "include": [
-    "./typings/*",
-    "./src/**/*.ts",
-    "./src/**/*.tsx"
-  ]
+  "include": ["./typings/*", "./src/**/*.ts", "./src/**/*.tsx"]
 }

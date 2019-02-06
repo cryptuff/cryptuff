@@ -14,7 +14,7 @@ export function initClient() {
       console.log(`Received topic ${details!.topic}:\n`, args, kwargs, details);
     });
 
-    setTimeout(async () => {
+    setInterval(async () => {
       console.log("Client requesting OB (RPC request)");
       let ticker = await session.call<string>(
         Methods.OrderBookSubscription,

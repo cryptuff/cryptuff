@@ -8,9 +8,10 @@
       "type": "node",
       "request": "launch",
       "name": "Launch pds",
-      "console": "integratedTerminal",
-      "program": "${workspaceFolder}/packages/pds/dist/index.js",
-      "preLaunchTask": "@@ cryptuff :: build pds"
+      "program": "${file}",
+      "outFiles": ["${workspaceFolder}/packages/pds/dist/**/*.js"],
+      "smartStep": true
+      // "preLaunchTask": "@@ cryptuff :: build pds"
     },
     {
       "name": "moonlander :: Chrome",
