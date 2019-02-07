@@ -1,5 +1,9 @@
 import { Connection, Session, SubscribeHandler, IEvent } from "autobahn";
-import { ITickerRequest, ITickerResponse, Methods } from "@cryptuff/core";
+import {
+  ITickerRequest,
+  ITickerResponse,
+  OrderBookSubscription
+} from "@cryptuff/core";
 
 var url = "ws://localhost:38000/ws"; //Internal port: 8080
 var realm = "com.cryptuff";
@@ -10,14 +14,23 @@ export function initClient() {
   console.log("Starting client...");
 
   function onopen(session: Session) {
-    session.subscribe("*", (args, kwargs, details) => {
-      console.log(`Received topic ${details!.topic}:\n`, args, kwargs, details);
-    });
+    session.subscribe(
+      "com",
+      (args, kwargs, details) => {
+        console.log(
+          `Received topic ${details!.topic} with args/kwargs/details:\n`,
+          args,
+          kwargs,
+          details
+        );
+      },
+      { match: "prefix" }
+    );
 
     setInterval(async () => {
       console.log("Client requesting OB (RPC request)");
       let ticker = await session.call<string>(
-        Methods.OrderBookSubscription,
+        OrderBookSubscription,
         null,
         exchangeInstrument
       );
