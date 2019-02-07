@@ -8,11 +8,37 @@
       "type": "node",
       "request": "launch",
       "name": "Launch pds",
-      "program": "${file}",
+      "program": "${workspaceFolder}/packages/pds/src/index.ts",
       "outFiles": ["${workspaceFolder}/packages/pds/dist/**/*.js"],
-      "smartStep": true
-      // "preLaunchTask": "@@ cryptuff :: build pds"
+      "smartStep": true,
+      "console": "integratedTerminal"
+      //"preLaunchTask": "@@ cryptuff :: build pds"
     },
+    // {
+    //   "type": "node",
+    //   "request": "launch",
+    //   "name": "Launch pds2",
+    //   "runtimeExecutable": "yarn",
+    //   "cwd": "${workspaceFolder}/packages/pds",
+    //   "runtimeArgs": ["run", "dev"],
+    //   "smartStep": true
+    // },
+    // {
+    //   "type": "node",
+    //   "request": "launch",
+    //   "name": "Launch pds 3",
+    //   "program": "${workspaceFolder}/packages/pds/src/index.ts",
+    //   "cwd": "${workspaceFolder}/packages/pds",
+    //   "outFiles": ["${workspaceFolder}/packages/pds/dist/**/*.js"],
+    //   "env": {
+    //     "NODE_ENV": "development"
+    //   },
+    //   "internalConsoleOptions": "openOnFirstSessionStart",
+    //   "sourceMaps": true,
+    //   "stopOnEntry": false,
+    //   "smartStep": true,
+    //   "preLaunchTask": "@@ pds : compile"
+    // },
     {
       "name": "moonlander :: Chrome",
       "type": "chrome",

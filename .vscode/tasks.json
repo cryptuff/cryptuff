@@ -9,6 +9,31 @@
       "script": "build",
       "path": "packages/pds/",
       "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "_@@ pds : compile",
+      "type": "typescript",
+      "tsconfig": "${workspaceFolder}/packages/pds/tsconfig.json",
+      "problemMatcher": ["$tsc"],
+      "options": {
+        "cwd": "${workspaceFolder}/packages/pds"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "@@ pds : compile",
+      "type": "npm",
+      "script": "build",
+      "path": "${workspaceFolder}/packages/pds/",
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "type": "typescript",
+      "tsconfig": "packages\\pds\\tsconfig.json",
+      "problemMatcher": ["$tsc"]
     }
   ]
 }
