@@ -1,5 +1,5 @@
 import { Connection, Session } from "autobahn";
-import { ITickerRequest, ITickerResponse, Core,  } from "@cryptuff/core";
+import { ITickerRequest, ITickerResponse, Core } from "@cryptuff/core";
 import { PDSServer } from "./pdsServer";
 
 var routerUrl = "ws://localhost:38000/ws"; //Internal port: 8000

@@ -1,8 +1,8 @@
 export interface ITickerRequest {
-    exchange: string;
-    pair: string;
+  exchange: string;
+  pair: string;
 }
 
 export interface ITickerResponse {
-    price: number;
+  price: number;
 }

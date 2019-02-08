@@ -10,14 +10,12 @@ export class KrakenClient {
 
   connect() {
     return new Promise((resolve, reject) => {
-        this.ws = new WebSocket(this.endpoint);
-        this.ws.onopen = ev => {
-            resolve(ev);
-        }
+      this.ws = new WebSocket(this.endpoint);
+      this.ws.onopen = ev => {
+        resolve(ev);
+      };
     });
   }
-
-  
 }
 
 // let ws: WebSocket;
