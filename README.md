@@ -1,8 +1,8 @@
 # cryptuff
 
-Monorepo for all things crypto
+Monorepo for all things crypto.
 
-## Getting started
+## Getting started 
 
 1. Install all dependencies in packages and link projects between them
 
