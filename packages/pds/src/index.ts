@@ -2,6 +2,9 @@ import { Connection, Session } from "autobahn";
 import { ITickerRequest, ITickerResponse, Core } from "@cryptuff/core";
 import { PDSServer } from "./pdsServer";
 
+import dotenv from "dotenv";
+dotenv.config();
+
 var routerUrl = "ws://localhost:38000/ws"; //Internal port: 8000
 var realm = "com.cryptuff";
 var topic = "com.cryptuff.pds";

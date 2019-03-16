@@ -16,10 +16,12 @@
   "dependencies": {
     "@cryptuff/core": "^0.0.1",
     "autobahn": "^18.10.2",
+    "dotenv": "^7.0.0",
     "tslib": "^1.9.3"
   },
   "devDependencies": {
     "@types/autobahn": "^0.9.41",
+    "@types/dotenv": "^6.1.0",
     "@types/node": "^10.12.20",
     "tslint": "^5.12.1",
     "typescript": "^3.2.4"
