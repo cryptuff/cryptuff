@@ -1,12 +1,27 @@
 import { Connection, Session, RegisterEndpoint } from "autobahn";
-import { KrakenClient } from "./kraken-ws-client";
-import { Exchange, Instrument, OrderBookSubscription } from "@cryptuff/core";
-
-const CRYPTUFF_REALM = "com.cryptuff";
+// import { KrakenClient } from "./kraken-ws-client";
+import {
+  Exchange,
+  Instrument,
+  OrderBookSubscription,
+  KrakenClient,
+  CRYPTUFF_REALM,
+  OrderBookSnapshot,
+  OrderBookDelta
+} from "@cryptuff/core";
 
 interface OrderBookRequestParameters {
   exchange: Exchange;
   instrument: Instrument;
+}
+
+interface Register {
+  orderbook: {
+    [key: string]: {
+      interests: number;
+      snapshot: OrderBookSnapshot;
+    };
+  };
 }
 
 export class PDSServer {
@@ -14,17 +29,17 @@ export class PDSServer {
   private routerSession?: Session;
   private krakenClient: KrakenClient;
 
-  constructor(
-    private serverUrl: string,
-    private realm: string = CRYPTUFF_REALM
-  ) {
+  private register: Register;
+
+  constructor(private routerUrl: string, realm: string = CRYPTUFF_REALM) {
     console.log("Initialising pds server...");
 
     this.routerConnection = new Connection({
-      url: this.serverUrl,
-      realm: this.realm
+      url: this.routerUrl,
+      realm: realm
     });
     this.krakenClient = new KrakenClient();
+    this.register = { orderbook: {} };
   }
 
   connectToRouter() {
@@ -85,8 +100,22 @@ export class PDSServer {
 
   async onOrderBookRequest(
     _: any,
-    { exchange, instrument }: OrderBookRequestParameters
+    {
+      exchange,
+      instrument: { token, quote, symbol }
+    }: OrderBookRequestParameters
   ) {
-    return `${exchange}: ${instrument};`;
+    const key = `${exchange}__${token}/${quote}`;
+    var ob = this.register.orderbook[key];
+    if (ob && ob.interests > 0) {
+      return ob.snapshot;
+    } else {
+      // Register interest
+
+      // Subscribe on krakenclient
+      await this.krakenClient.subscribeToOrderBook(symbol!, () => {});
+
+      // Return a promise or something?
+    }
   }
 }

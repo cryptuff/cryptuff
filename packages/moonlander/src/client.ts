@@ -1,49 +1,129 @@
-import { Connection, Session, SubscribeHandler, IEvent } from "autobahn";
+import {
+  Connection,
+  Session,
+  SubscribeHandler,
+  IEvent,
+  Subscription,
+  ISubscription
+} from "autobahn";
 import {
   ITickerRequest,
   ITickerResponse,
-  OrderBookSubscription
+  OrderBookSubscription,
+  Exchange,
+  Instrument,
+  CRYPTUFF_REALM
 } from "@cryptuff/core";
 
-var url = "ws://localhost:38000/ws"; //Internal port: 8080
-var realm = "com.cryptuff";
 var topic = "com.cryptuff.pds";
 var exchangeInstrument = { exchange: "Kraken", instrument: "ETHUSD" };
 
-export function initClient() {
-  console.log("Starting client...");
+export class Client {
+  private session: Session;
 
-  function onopen(session: Session) {
-    session.subscribe(
-      "com",
-      (args, kwargs, details) => {
-        console.log(
-          `Received topic ${details!.topic} with args/kwargs/details:\n`,
-          args,
-          kwargs,
-          details
-        );
-      },
-      { match: "prefix" }
-    );
-
-    setInterval(async () => {
-      console.log("Client requesting OB (RPC request)");
-      let ticker = await session.call<string>(
-        OrderBookSubscription,
-        null,
-        exchangeInstrument
-      );
-      console.log(`Received: ${JSON.stringify(ticker)}`);
-    }, 3000);
+  constructor(public config: { url: string; realm: string }) {
+    console.log("Starting client...");
   }
 
-  (async () => {
-    var connection = new Connection({ url, realm });
-    connection.onopen = (session: Session, details: any) => {
-      console.log("client connected to router!", details);
-      onopen(session);
-    };
-    connection.open();
-  })();
+  private onSessionOpen(session: Session, details: any) {
+    console.log("client connected to router!", details);
+    this.session = session;
+  }
+
+  async connect() {
+    const { url, realm } = this.config;
+    const connection = new Connection(this.config);
+
+    return new Promise((resolve, reject) => {
+      connection.onopen = (...args) => {
+        this.onSessionOpen(...args);
+        resolve();
+      };
+
+      connection.onclose = (reason, details) => {
+        console.log(
+          "Session was closed or could not be established:",
+          reason,
+          details
+        );
+        reject(reason);
+        if (reason === "lost") {
+          return false;
+        } else {
+          reject(reason);
+          return true;
+        }
+      };
+
+      connection.open();
+    });
+  }
+  subscribe<T>(topic: string, onResults: (r: T[]) => void) {
+    return this.session.subscribe(topic, onResults);
+  }
+
+  unsubscribe(subscription: Subscription) {
+    return this.session.unsubscribe(subscription);
+  }
+
+  call<T, TPayload>(methodName: string, payload: TPayload) {
+    return this.session.call<T>(methodName, null, payload);
+  }
 }
+
+var url = "ws://localhost:38000/ws"; //Internal port: 8080
+
+export class PDSClient {
+  client: Client;
+
+  constructor() {}
+
+  init() {
+    this.client = new Client({ url, realm: CRYPTUFF_REALM });
+    return this.client.connect();
+  }
+
+  getOrderBookSnapshot(exchange: Exchange, pair: Instrument) {
+    return this.client.call(OrderBookSubscription, {
+      exchange,
+      instrument: pair
+    });
+  }
+}
+// export function initClient() {
+//   console.log("Starting client...");
+
+//   function onopen(session: Session) {
+//     session.subscribe(
+//       "com",
+//       (args, kwargs, details) => {
+//         console.log(
+//           `Received topic ${details!.topic} with args/kwargs/details:\n`,
+//           args,
+//           kwargs,
+//           details
+//         );
+//       },
+//       { match: "prefix" }
+//     );
+
+//     setInterval(async () => {
+//       console.log("Client requesting OB (RPC request)");
+//       let ticker = await session.call<string>(
+//         OrderBookSubscription,
+//         null,
+//         exchangeInstrument
+//       );
+//       console.log(`Received: ${JSON.stringify(ticker)}`);
+//     }, 3000);
+//   }
+
+//   (async () => {
+//     var connection = new Connection({ url, realm });
+//     connection.onopen = (session: Session, details: any) => {
+//       console.log("client connected to router!", details);
+//       onopen(session);
+//     };
+//     connection.open();
+//   })();
+// }

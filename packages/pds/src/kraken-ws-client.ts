@@ -28,7 +28,7 @@ export class KrakenClient {
 
 // function subscribe(callback) {
 //   // Event handler for receiving text messages
-//   ws.onmessage = data => {
+//   ws.nmessag = data => {
 //     if (data.type === "close") {
 //       return;
 //     }
