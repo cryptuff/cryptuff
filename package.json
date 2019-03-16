@@ -19,8 +19,10 @@
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "build": "lerna run build",
+    "clean": "lerna clean -y",
+    "lint": "tslint --fix --project ./packages/tsconfig.lint.json",
     "test": "lerna run test",
-    "clean": "lerna clean -y"
+    "watch": "tsc -w -b ./packages"
   },
   "husky": {
     "hooks": {
@@ -30,6 +32,10 @@
   "lint-staged": {
     "*.{ts,js,json,css,md}": [
       "prettier --write",
+      "git add"
+    ],
+    "*.ts": [
+      "yarn run lint",
       "git add"
     ]
   }
