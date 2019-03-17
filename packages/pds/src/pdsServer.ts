@@ -38,17 +38,12 @@ export class PDSServer {
       url: this.routerUrl,
       realm: realm
     });
-    this.krakenClient = new KrakenClient();
+    this.krakenClient = new KrakenClient({ sandbox: true });
     this.register = { orderbook: {} };
   }
 
   connectToRouter() {
     this.routerConnection.onopen = (session: Session, details: any) => {
-      console.log(
-        `pds server connected to router via autobahn!`,
-        session,
-        details
-      );
       this.routerSession = session;
       this.onSessionOpen();
     };
@@ -93,9 +88,8 @@ export class PDSServer {
 
     let registration = await this.routerSession.register(
       OrderBookSubscription,
-      this.onOrderBookRequest
+      this.onOrderBookRequest.bind(this)
     );
-    console.log(`Server registered ${registration.procedure}`, registration);
   }
 
   async onOrderBookRequest(
@@ -111,9 +105,9 @@ export class PDSServer {
       return ob.snapshot;
     } else {
       // Register interest
-
-      // Subscribe on krakenclient
-      await this.krakenClient.subscribeToOrderBook(symbol!, () => {});
+      return this.krakenClient.connect().then(() => {
+        this.krakenClient.subscribeToOrderBook(symbol!, () => {});
+      });
 
       // Return a promise or something?
     }

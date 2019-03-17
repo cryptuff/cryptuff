@@ -1,7 +1,5 @@
-const PROD_ENDPOINT = "wss://ws.kraken.com";
+const PRODUCTION_ENDPOINT = "wss://ws.kraken.com";
 const SANDBOX_ENDPOINT = "wss://ws-sandbox.kraken.com";
-const ENDPOINT =
-  process.env.NODE_ENV === "production" ? PROD_ENDPOINT : SANDBOX_ENDPOINT;
 
 interface Message {
   reqId?: number;
@@ -12,16 +10,21 @@ interface Message {
     depth?: 10 | 25 | 100 | 500 | 1000;
   };
 }
+
+type Options = {
+  sandbox?: boolean;
+};
+
 export class KrakenClient {
-  private endpoint = ENDPOINT;
+  private endpoint = SANDBOX_ENDPOINT;
   private ws?: WebSocket;
 
   private handlers: {
     [id: string]: (x: any) => any;
   };
 
-  constructor() {
-    this.endpoint = ENDPOINT;
+  constructor(options: { sandbox?: boolean }) {
+    this.endpoint = options.sandbox ? SANDBOX_ENDPOINT : PRODUCTION_ENDPOINT;
     this.handlers = {};
   }
 
@@ -35,7 +38,10 @@ export class KrakenClient {
     });
   }
 
-  private onMessage = (event: MessageEvent) => {
+  private messageBroker(event: any) {}
+
+  private onMessage = (event: any) => {
+    console.log("ws message:", event);
     const data = JSON.parse(event.data);
     if (data && data.event === "heartbeat") return;
     if (data.reqid && this.reqIdsTempMap[data.reqid]) {
@@ -104,13 +110,67 @@ export class KrakenClient {
     };
   };
 }
+export namespace Kraken {
+  export namespace InboundMessages {
+    export type Ping = {
+      event: "ping";
+      reqid?: number;
+    };
+    export type Pong = {
+      event: "pong";
+      reqid?: number;
+    };
 
-// const client = new KrakenClient({... });
+    export type Heartbeat = {
+      event: "heartbeat";
+    };
 
-// const teardown = client.subscribeToOrderBook({
-//     symbol: 'btc/eur',
-//     onSnapshot() {},
-//     onUpdate() {},
-// });
+    export type SystemStatus = {
+      event: "systemStatus";
+      connectionID: number;
+      status: "online" | "maintenance" | string;
+      version: string;
+    };
 
-// teardown();
+    export type SubscriptionStatus = {
+      channelID: number;
+      event: "subscriptionStatus";
+      status: "subscribed" | "unsubscribed" | "error";
+      pair: string;
+      reqid?: number;
+      subscription: {
+        name: "ticker" | "ohlc" | "trade" | "book" | "spread" | "*";
+        interval?: 1 | 5 | 15 | 30 | 60 | 240 | 1440 | 10080 | 21600;
+        depth?: 10 | 25 | 100 | 500 | 1000;
+      };
+      errorMessage?: string;
+    };
+
+    export type LevelValue = [string, string, string]; // strings are floats
+    export type OrderBookSnapshot = [
+      number,
+      {
+        as: LevelValue[];
+        bs: LevelValue[];
+      }
+    ];
+
+    export type OrderBookUpdate = [
+      number,
+
+
+        | { a: LevelValue[] }
+        | { b: LevelValue[] }
+        | { a: LevelValue[]; b: LevelValue[] }
+    ];
+
+    export type InboundMessage =
+      | Ping
+      | Pong
+      | OrderBookUpdate
+      | OrderBookSnapshot
+      | SystemStatus
+      | SubscriptionStatus
+      | Heartbeat;
+  }
+}

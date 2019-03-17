@@ -7,6 +7,7 @@
   "devDependencies": {
     "@types/jest": "^23.3.13",
     "@types/node": "^10.12.18",
+    "concurrently": "^4.1.0",
     "husky": "^1.3.1",
     "jest": "^23.6.0",
     "lerna": "^3.10.7",
@@ -22,7 +23,7 @@
     "clean": "lerna clean -y",
     "lint": "tslint --fix --project ./packages/tsconfig.lint.json",
     "test": "lerna run test",
-    "watch": "tsc -w -b ./packages"
+    "start": "lerna run start:dev --parallel"
   },
   "husky": {
     "hooks": {

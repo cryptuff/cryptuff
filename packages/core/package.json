@@ -5,8 +5,12 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "build": "rimraf ./lib && tsc",
-    "dev": "rimraf ./lib && tsc --watch",
+    "build": "tsc",
+    "clean": "rimraf ./lib",
+    "prebuild": "npm run clean",
+    "build:watch": "tsc --watch",
+    "prestart:dev": "npm run clean",
+    "start:dev": "npm run build:watch",
     "test": "jest"
   },
   "author": "",

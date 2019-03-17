@@ -5,11 +5,14 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "rimraf ./dist && tsc --build",
-    "build:watch": "rimraf ./dist && tsc --build --watch",
-    "tscbuild": "tsc --build",
-    "dev": "tsc --watch & nodemon dist",
-    "test": "jest"
+    "clean": "rimraf ./dist",
+    "prebuild": "npm run clean",
+    "prebuild:watch": "npm run clean",
+    "build": "tsc --build",
+    "build:watch": "tsc --build --watch",
+    "test": "jest",
+    "start": "node dist",
+    "start:dev": "npm run clean && concurrently 'yarn build:watch' 'nodemon dist' --restart-tries 2"
   },
   "author": "",
   "license": "MIT",
