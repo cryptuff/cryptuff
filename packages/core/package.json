@@ -8,7 +8,7 @@
     "build": "tsc",
     "clean": "rimraf ./lib",
     "prebuild": "npm run clean",
-    "build:watch": "tsc --watch",
+    "build:watch": "tsc --watch --preserveWatchOutput",
     "prestart:dev": "npm run clean",
     "start:dev": "npm run build:watch",
     "test": "jest"

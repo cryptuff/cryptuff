@@ -9,10 +9,11 @@
     "prebuild": "npm run clean",
     "prebuild:watch": "npm run clean",
     "build": "tsc --build",
-    "build:watch": "tsc --build --watch",
+    "build:watch": "tsc --build --watch --preserveWatchOutput",
     "test": "jest",
     "start": "node dist",
-    "start:dev": "npm run clean && concurrently 'yarn build:watch' 'nodemon dist' --restart-tries 2"
+    "prestart:dev": "npm run clean",
+    "start:dev": "concurrently 'yarn build:watch' 'sleep 3 && nodemon dist' --restart-tries 2"
   },
   "author": "",
   "license": "MIT",
