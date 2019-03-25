@@ -1,34 +1,18 @@
+import dotenv from "dotenv";
+import path from "path";
 import { Connection, Session } from "autobahn";
 import { ITickerRequest, ITickerResponse, Core } from "@cryptuff/core";
 import { PDSServer } from "./pdsServer";
 
-var routerUrl = "ws://localhost:38000/ws"; //Internal port: 8000
+dotenv.config();
+
+if (!process.env.ROUTER_ENDPOINT) throw new Error("No Router Endpoint");
+if (!process.env.KRAKEN_ENDPOINT) throw new Error("No Router Endpoint");
+
+var routerUrl = process.env.ROUTER_ENDPOINT;
 var realm = "com.cryptuff";
 var topic = "com.cryptuff.pds";
 var getTickerProcedure = "com.cryptuff.pds.getTicker";
-
-// const onopen = async (session: Session) => {
-//   var a = 0;
-//   setInterval(async () => {
-//     a++;
-//     console.log(`Server publishing on ${topic}: ${a}`);
-//     await session.publish(topic, [{ obj: a }]);
-//   }, 2000);
-//   console.log("Server registering getTicker");
-//   try {
-//     let registration = await session.register(
-//       "com.cryptuff.pds.getTicker",
-//       (args, { exchange, pair }: ITickerRequest) => {
-//         console.log(`Serving ticker ${pair}@${exchange}`);
-//         return { price: 3.14 } as ITickerResponse;
-//       },
-//       { invoke: "roundrobin" }
-//     );
-//     console.log(`Server registered ${registration.procedure}`);
-//   } catch (e) {
-//     debugger;
-//   }
-// };
 
 (async () => {
   var pdsServer = new PDSServer(routerUrl);

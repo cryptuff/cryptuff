@@ -8,7 +8,7 @@ import React, { Component, Suspense } from "react";
 import { PDSClient } from "./client";
 
 const client = new PDSClient();
-const kclient = new KrakenClient();
+const kclient = new KrakenClient({ sandbox: true });
 
 class App extends Component {
   render() {
@@ -21,10 +21,10 @@ class App extends Component {
           <Button
             onClick={async () => {
               const ob = await client.getOrderBookSnapshot("kraken", {
-                token: "btc",
+                token: "xbt",
                 quote: "eur"
               });
-              console.log(ob)
+              console.log(ob);
             }}
           >
             Get orderbook

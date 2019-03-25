@@ -5,15 +5,20 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "build": "rimraf ./lib && tsc",
-    "dev": "rimraf ./lib && tsc --watch",
+    "build": "tsc",
+    "clean": "rimraf ./lib",
+    "prebuild": "npm run clean",
+    "build:watch": "tsc --watch --preserveWatchOutput",
+    "prestart:dev": "npm run clean",
+    "start:dev": "npm run build:watch",
     "test": "jest"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
     "autobahn": "^18.10.2",
-    "tslib": "^1.9.3"
+    "tslib": "^1.9.3",
+    "ws": "^6.2.0"
   },
   "devDependencies": {
     "@types/autobahn": "^0.9.41",

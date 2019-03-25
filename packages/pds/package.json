@@ -5,21 +5,27 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "rimraf ./dist && tsc --build",
-    "build:watch": "rimraf ./dist && tsc --build --watch",
-    "tscbuild": "tsc --build",
-    "dev": "tsc --watch & nodemon dist",
-    "test": "jest"
+    "clean": "rimraf ./dist",
+    "prebuild": "npm run clean",
+    "prebuild:watch": "npm run clean",
+    "build": "tsc --build",
+    "build:watch": "tsc --build --watch --preserveWatchOutput",
+    "test": "jest",
+    "start": "node dist",
+    "prestart:dev": "npm run clean",
+    "start:dev": "concurrently 'yarn build:watch' 'sleep 3 && nodemon dist' --restart-tries 2"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
     "@cryptuff/core": "^0.0.1",
     "autobahn": "^18.10.2",
+    "dotenv": "^7.0.0",
     "tslib": "^1.9.3"
   },
   "devDependencies": {
     "@types/autobahn": "^0.9.41",
+    "@types/dotenv": "^6.1.0",
     "@types/node": "^10.12.20",
     "tslint": "^5.12.1",
     "typescript": "^3.2.4"
