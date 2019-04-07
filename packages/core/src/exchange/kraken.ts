@@ -23,7 +23,7 @@ export class KrakenClient {
     [id: string]: (x: any) => any;
   };
 
-  constructor(options: { sandbox?: boolean }) {
+  constructor(options: Options) {
     this.endpoint = options.sandbox ? SANDBOX_ENDPOINT : PRODUCTION_ENDPOINT;
     this.handlers = {};
   }
