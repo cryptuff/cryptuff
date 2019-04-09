@@ -8,11 +8,11 @@
     "clean": "rimraf ./dist",
     "prebuild": "npm run clean",
     "prebuild:watch": "npm run clean",
-    "build": "tsc --build",
+    "build": "tsc --build --verbose",
     "build:watch": "tsc --build --watch --preserveWatchOutput",
     "test": "jest",
     "start": "node dist",
-    "prestart:dev": "npm run clean",
+    "//prestart:dev": "npm run clean",
     "start:dev": "concurrently \"yarn build:watch\" \"sleep 15 && nodemon dist\" --restart-tries 2"
   },
   "author": "",

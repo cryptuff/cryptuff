@@ -11,6 +11,8 @@
     "jsx": "react",
 
     "composite": true,
+    "declaration": true,
+    "declarationMap": true,
 
     "paths": {
       "@components/*": ["src/components/*"],

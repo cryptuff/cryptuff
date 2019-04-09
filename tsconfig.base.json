@@ -6,8 +6,8 @@
     "lib": ["dom", "esnext"],
 
     "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
+    //"declaration": true,
+    //"declarationMap": true,
 
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,

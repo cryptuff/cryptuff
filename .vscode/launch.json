@@ -13,8 +13,8 @@
       "outFiles": ["${workspaceFolder}/packages/pds/dist/**/*.js"],
       "smartStep": true,
       "console": "integratedTerminal",
-      "skipFiles": ["<node_internals>/**"],
-      "preLaunchTask": "@@ pds : compile"
+      "skipFiles": ["<node_internals>/**"]
+      // "preLaunchTask": "@@ pds : compile"
     },
     // {
     //   "type": "node",

@@ -5,6 +5,8 @@
     "rootDir": "src",
     "outDir": "lib",
     "composite": true,
+    "declaration": true,
+    "declarationMap": true,
     // "types": [],
     // "lib": ["esnext", "dom"],
     "module": "commonjs"

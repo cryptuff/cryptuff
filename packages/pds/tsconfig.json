@@ -3,12 +3,12 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "@cryptuff/core": ["../core"]
+    }
   },
   "include": ["./typings/*", "./src/**/*.ts", "./src/**/*.tsx"],
-  "paths": {
-    "@cryptuff/*": ["../cryptuff/packages/*"]
-  },
   "references": [
     {
       "path": "../core"
