@@ -4,8 +4,9 @@
     "baseUrl": ".",
     "rootDir": "src",
     "outDir": "lib",
-
     "composite": true,
+    // "types": [],
+    // "lib": ["esnext", "dom"],
     "module": "commonjs"
   },
   "include": ["./typings/*", "./src/**/*.ts", "./src/**/*.tsx"]

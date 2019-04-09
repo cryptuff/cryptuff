@@ -13,7 +13,7 @@
     "test": "jest",
     "start": "node dist",
     "prestart:dev": "npm run clean",
-    "start:dev": "concurrently 'yarn build:watch' 'sleep 3 && nodemon dist' --restart-tries 2"
+    "start:dev": "concurrently \"yarn build:watch\" \"sleep 15 && nodemon dist\" --restart-tries 2"
   },
   "author": "",
   "license": "MIT",
@@ -27,6 +27,7 @@
     "@types/autobahn": "^18.10.0",
     "@types/node": "10.12.18",
     "@types/dotenv": "^6.1.0",
+    "nodemon": "^1.18.11",
     "tslint": "^5.12.1",
     "typescript": "^3.4.2"
   }

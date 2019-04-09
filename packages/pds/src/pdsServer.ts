@@ -62,6 +62,7 @@ export class PDSServer {
     this.initPrompt();
   }
   initPrompt() {
+    console.log("Awaiting input");
     process.openStdin().addListener("data", async data => {
       if (!this.routerSession) return;
       const input = (data || "").toString().trimEnd();

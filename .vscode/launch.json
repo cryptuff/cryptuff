@@ -9,10 +9,12 @@
       "request": "launch",
       "name": "Launch pds",
       "program": "${workspaceFolder}/packages/pds/src/index.ts",
+      "cwd": "${workspaceFolder}/packages/pds",
       "outFiles": ["${workspaceFolder}/packages/pds/dist/**/*.js"],
       "smartStep": true,
-      "console": "integratedTerminal"
-      //"preLaunchTask": "@@ cryptuff :: build pds"
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "preLaunchTask": "@@ pds : compile"
     },
     // {
     //   "type": "node",
