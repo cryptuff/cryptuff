@@ -18,11 +18,13 @@
   "dependencies": {
     "autobahn": "^18.10.2",
     "tslib": "^1.9.3",
-    "ws": "^6.2.0"
+    "ws": "^6.2.0",
+    "isomorphic-ws": "4.0.1"
   },
   "devDependencies": {
     "@types/autobahn": "^18.10.0",
     "@types/node": "10.12.18",
+    "@types/ws": "6.0.1",
     "nodemon": "^1.18.11",
     "tslint": "^5.12.1",
     "typescript": "^3.4.2"

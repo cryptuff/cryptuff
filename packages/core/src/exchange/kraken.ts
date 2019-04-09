@@ -1,3 +1,5 @@
+import WebSocket from "isomorphic-ws";
+
 const PRODUCTION_ENDPOINT = "wss://ws.kraken.com";
 const SANDBOX_ENDPOINT = "wss://ws-sandbox.kraken.com";
 
@@ -18,6 +20,8 @@ type Options = {
 export class KrakenClient {
   private endpoint = SANDBOX_ENDPOINT;
   private ws?: WebSocket;
+
+  private nextReqId = 1;
 
   private handlers: {
     [id: string]: (x: any) => any;
@@ -41,7 +45,7 @@ export class KrakenClient {
   private messageBroker(event: any) {}
 
   private onMessage = (event: any) => {
-    console.log("ws message:", event);
+    // console.log("ws message:", event);
     const data = JSON.parse(event.data);
     if (data && data.event === "heartbeat") return;
     if (data.reqid && this.reqIdsTempMap[data.reqid]) {
@@ -61,7 +65,7 @@ export class KrakenClient {
       throw new Error("WebSocket connection not established");
     }
 
-    const reqid = 1234; // generate sequential reqid?
+    const reqid = this.nextReqId++;
 
     this.reqIdsTempMap[reqid] = (msg: any) => {
       this.handlers[msg.channelID] = cb;
@@ -73,8 +77,8 @@ export class KrakenClient {
       JSON.stringify({
         ...payload,
         reqid,
-        event: "subscribe"
-      })
+        event: "subscribe",
+      }),
     );
 
     // return an unsubscribe fn
@@ -87,15 +91,15 @@ export class KrakenClient {
     this.ws.send(
       JSON.stringify({
         ...payload,
-        event: "unsubscribe"
-      })
+        event: "unsubscribe",
+      }),
     );
   };
 
   subscribeToOrderBook = (symbol: string, callback: (data: any) => void) => {
     const payload: Message = {
       pair: [symbol],
-      subscription: { name: "book" }
+      subscription: { name: "book" },
     };
 
     this.subscribe(payload, callback);
@@ -104,8 +108,8 @@ export class KrakenClient {
       this.unsubscribe({
         pair: [symbol],
         subscription: {
-          name: "book"
-        }
+          name: "book",
+        },
       });
     };
   };
@@ -158,10 +162,7 @@ export namespace Kraken {
     export type OrderBookUpdate = [
       number,
 
-
-        | { a: LevelValue[] }
-        | { b: LevelValue[] }
-        | { a: LevelValue[]; b: LevelValue[] }
+      { a: LevelValue[] } | { b: LevelValue[] } | { a: LevelValue[]; b: LevelValue[] }
     ];
 
     export type InboundMessage =
