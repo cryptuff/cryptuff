@@ -11,8 +11,8 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "noImplicitAny": false, // Sorry
-    "strict": false, // Apologies
+    "noImplicitAny": true,
+    "strict": true,
     "forceConsistentCasingInFileNames": false,
     "resolveJsonModule": true
   },

@@ -80,6 +80,7 @@
     "storybook": "start-storybook -p 6086",
     "build-storybook": "build-storybook -c .storybook -o dist",
     "deploy-storybook": "storybook-to-ghpages",
+    "start:dev": "yarn run storybook",
     "test": "jest",
     "build": "yarn run ts:check && rollup -c ./config/rollup.config.js && yarn run ts:dec",
     "ts:check": "tsc --noEmit",

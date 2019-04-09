@@ -22,7 +22,8 @@ class App extends Component {
             onClick={async () => {
               const ob = await client.getOrderBookSnapshot("kraken", {
                 token: "xbt",
-                quote: "eur"
+                quote: "eur",
+                symbol: "XBT/EUR",
               });
               console.log(ob);
             }}

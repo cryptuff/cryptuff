@@ -7,7 +7,7 @@ import {
   KrakenClient,
   CRYPTUFF_REALM,
   OrderBookSnapshot,
-  OrderBookDelta
+  OrderBookDelta,
 } from "@cryptuff/core";
 
 interface OrderBookRequestParameters {
@@ -36,7 +36,7 @@ export class PDSServer {
 
     this.routerConnection = new Connection({
       url: this.routerUrl,
-      realm: realm
+      realm: realm,
     });
     this.krakenClient = new KrakenClient({ sandbox: true });
     this.register = { orderbook: {} };
@@ -48,10 +48,7 @@ export class PDSServer {
       this.onSessionOpen();
     };
     this.routerConnection.onclose = (reason, details) => {
-      console.error(
-        `Autobahn connection to router closed!!\nReason: ${reason}\nDetails:`,
-        details
-      );
+      console.error(`Autobahn connection to router closed!!\nReason: ${reason}\nDetails:`, details);
       return false;
     };
     this.routerConnection.open();
@@ -73,9 +70,9 @@ export class PDSServer {
           args,
           [args],
           {
-            topic: args
+            topic: args,
           },
-          { disclose_me: true }
+          { disclose_me: true },
         );
         console.log(`Published: ${args}`);
       }
@@ -89,28 +86,27 @@ export class PDSServer {
 
     let registration = await this.routerSession.register(
       OrderBookSubscription,
-      this.onOrderBookRequest.bind(this)
+      this.onOrderBookRequest.bind(this),
     );
   }
 
   async onOrderBookRequest(
     _: any,
-    {
-      exchange,
-      instrument: { token, quote, symbol }
-    }: OrderBookRequestParameters
+    { exchange, instrument: { token, quote, symbol } }: OrderBookRequestParameters,
   ) {
     const key = `${exchange}__${token}/${quote}`;
     var ob = this.register.orderbook[key];
-    if (ob && ob.interests > 0) {
-      return ob.snapshot;
-    } else {
-      // Register interest
-      return this.krakenClient.connect().then(() => {
+    // WIP!!
+    return new Promise(async (res, rej) => {
+      if (ob && ob.interests > 0) {
+        res(ob.snapshot);
+      } else {
+        // Register interest
+        await this.krakenClient.connect();
         this.krakenClient.subscribeToOrderBook(symbol!, () => {});
-      });
 
-      // Return a promise or something?
-    }
+        // Return a promise or something?
+      }
+    });
   }
 }
