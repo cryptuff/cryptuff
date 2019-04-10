@@ -4,7 +4,7 @@ import {
   SubscribeHandler,
   IEvent,
   Subscription,
-  ISubscription
+  ISubscription,
 } from "autobahn";
 import {
   ITickerRequest,
@@ -12,14 +12,21 @@ import {
   OrderBookSubscription,
   Exchange,
   Instrument,
-  CRYPTUFF_REALM
+  CRYPTUFF_REALM,
 } from "@cryptuff/core";
 
 var topic = "com.cryptuff.pds";
 var exchangeInstrument = { exchange: "Kraken", instrument: "ETHUSD" };
 
 export class Client {
-  private session: Session;
+  private _session?: Session;
+
+  private get session() {
+    if (!this._session) {
+      throw new Error("session not initialized");
+    }
+    return this._session;
+  }
 
   constructor(public config: { url: string; realm: string }) {
     console.log("Starting client...");
@@ -27,7 +34,7 @@ export class Client {
 
   private onSessionOpen(session: Session, details: any) {
     console.log("client connected to router!", details);
-    this.session = session;
+    this._session = session;
   }
 
   async connect() {
@@ -41,11 +48,7 @@ export class Client {
       };
 
       connection.onclose = (reason, details) => {
-        console.log(
-          "Session was closed or could not be established:",
-          reason,
-          details
-        );
+        console.log("Session was closed or could not be established:", reason, details);
         reject(reason);
         if (reason === "lost") {
           return false;
@@ -76,17 +79,18 @@ var url = "ws://localhost:38000/ws"; //Internal port: 8080
 export class PDSClient {
   client: Client;
 
-  constructor() {}
+  constructor() {
+    this.client = new Client({ url, realm: CRYPTUFF_REALM });
+  }
 
   init() {
-    this.client = new Client({ url, realm: CRYPTUFF_REALM });
     return this.client.connect();
   }
 
   getOrderBookSnapshot(exchange: Exchange, pair: Instrument) {
     return this.client.call(OrderBookSubscription, {
       exchange,
-      instrument: pair
+      instrument: pair,
     });
   }
 }

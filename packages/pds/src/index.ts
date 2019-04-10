@@ -15,5 +15,6 @@ var getTickerProcedure = "com.cryptuff.pds.getTicker";
 
 (async () => {
   var pdsServer = new PDSServer(routerUrl);
+  await pdsServer.connectToExchanges();
   await pdsServer.connectToRouter();
 })();

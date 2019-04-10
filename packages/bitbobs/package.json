@@ -77,7 +77,7 @@
   },
   "scripts": {
     "force-resolutions": "npx npm-force-resolutions",
-    "storybook": "start-storybook -p 6086",
+    "storybook": "start-storybook -p 6009",
     "build-storybook": "build-storybook -c .storybook -o dist",
     "deploy-storybook": "storybook-to-ghpages",
     "start:dev": "yarn run storybook",

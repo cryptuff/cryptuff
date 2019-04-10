@@ -42,6 +42,12 @@ export class PDSServer {
     this.register = { orderbook: {} };
   }
 
+  async connectToExchanges() {
+    console.log("Connecting to Kraken...");
+    await this.krakenClient.connect();
+    console.log("Kraken connected!");
+  }
+
   connectToRouter() {
     this.routerConnection.onopen = (session: Session, details: any) => {
       this.routerSession = session;
@@ -90,23 +96,27 @@ export class PDSServer {
     );
   }
 
-  async onOrderBookRequest(
-    _: any,
-    { exchange, instrument: { token, quote, symbol } }: OrderBookRequestParameters,
-  ) {
+  async subscribeToOrderBook(exchange: Exchange, symbol: string) {
+    if (exchange === "kraken") {
+      this.krakenClient.subscribeToOrderBook(symbol, data => {});
+    }
+
+    throw new Error(`Exchange ${exchange} not supported`);
+  }
+
+  async onOrderBookRequest(_: any, { exchange, instrument }: OrderBookRequestParameters) {
+    const { token, quote, symbol } = instrument;
     const key = `${exchange}__${token}/${quote}`;
+    console.log(`Received order book request for ${key}`);
     var ob = this.register.orderbook[key];
     // WIP!!
-    return new Promise(async (res, rej) => {
-      if (ob && ob.interests > 0) {
-        res(ob.snapshot);
-      } else {
-        // Register interest
-        await this.krakenClient.connect();
-        this.krakenClient.subscribeToOrderBook(symbol!, () => {});
+    if (ob && ob.interests > 0) {
+      return ob.snapshot;
+    } else {
+      // Register interest
+      await this.subscribeToOrderBook(exchange, symbol!);
 
-        // Return a promise or something?
-      }
-    });
+      // Return a promise or something?
+    }
   }
 }
