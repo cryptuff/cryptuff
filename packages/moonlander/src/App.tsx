@@ -6,6 +6,7 @@ import { KrakenClient } from "@cryptuff/core";
 import React, { Component, Suspense } from "react";
 
 import { PDSClient } from "./client";
+import { KrakenClientRig } from "./rigs/clientRig";
 
 const client = new PDSClient();
 const kclient = new KrakenClient({ sandbox: true });
@@ -30,6 +31,7 @@ class App extends Component {
           >
             Get orderbook
           </Button>
+          <KrakenClientRig maxNumberOfTrades={30} />
         </Suspense>
       </div>
     );

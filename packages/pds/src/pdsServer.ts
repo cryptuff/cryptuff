@@ -1,5 +1,4 @@
 import { Connection, Session, RegisterEndpoint } from "autobahn";
-// import { KrakenClient } from "./kraken-ws-client";
 import {
   Exchange,
   Instrument,

@@ -48,6 +48,7 @@ export class KrakenClient {
     // console.log("ws message:", event);
     const data = JSON.parse(event.data);
     if (data && data.event === "heartbeat") return;
+
     if (data.reqid && this.reqIdsTempMap[data.reqid]) {
       this.reqIdsTempMap[data.reqid](data);
       return;
@@ -60,7 +61,7 @@ export class KrakenClient {
 
   reqIdsTempMap: { [reqid: number]: any } = {};
 
-  private subscribe = (payload: Message, cb: (...data: any) => void) => {
+  private subscribe = <T = any>(payload: Message, cb: (data: T) => void) => {
     if (!this.ws) {
       throw new Error("WebSocket connection not established");
     }
@@ -102,18 +103,41 @@ export class KrakenClient {
       subscription: { name: "book" },
     };
 
-    this.subscribe(payload, callback);
+    const unsubscribe = this.subscribe(payload, callback);
 
-    return () => {
-      this.unsubscribe({
-        pair: [symbol],
-        subscription: {
-          name: "book",
-        },
-      });
+    return unsubscribe;
+  };
+
+  subscribeToTrades = (
+    symbol: string,
+    callback: (data: Kraken.InboundMessages.KrakenTrade[]) => void,
+  ) => {
+    const payload: Message = {
+      pair: [symbol],
+      subscription: { name: "trade" },
     };
+
+    const unsubscribe = this.subscribe(payload, (data: Array<string[]>) => {
+      const trades = data.map<Kraken.InboundMessages.KrakenTrade>(tradeArr => ({
+        symbol,
+        price: tradeArr[0],
+        volume: tradeArr[1],
+        time: tradeArr[2],
+      }));
+      callback(trades);
+    });
+
+    return unsubscribe;
+  };
+  unsubscribeTrades = (symbol: string) => {
+    const payload: Message = {
+      pair: [symbol],
+      subscription: { name: "trade" },
+    };
+    return this.unsubscribe(payload);
   };
 }
+
 export namespace Kraken {
   export namespace InboundMessages {
     export type Ping = {
@@ -158,6 +182,13 @@ export namespace Kraken {
         bs: LevelValue[];
       }
     ];
+
+    export interface KrakenTrade {
+      symbol: string;
+      time: string;
+      price: string;
+      volume: string;
+    }
 
     export type OrderBookUpdate = [
       number,
