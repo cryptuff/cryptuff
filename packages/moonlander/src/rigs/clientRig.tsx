@@ -1,11 +1,12 @@
-import { KrakenClient, KrakenTrade } from "@cryptuff/core";
+import { KrakenClient, KrakenTrade, Kraken } from "@cryptuff/core";
 import React from "react";
 import styled from "styled-components";
 
-const kclient = new KrakenClient({ sandbox: true });
+// const kclient = new KrakenClient({ sandbox: true });
 
 interface Props {
   maxNumberOfTrades: number;
+  client: KrakenClient;
 }
 interface State {
   pair: string;
@@ -21,16 +22,19 @@ export class KrakenClientRig extends React.Component<Props, State> {
   };
 
   log(msg: string) {
-    this.setState(s => ({ log: [msg, ...s.log] }));
+    const date = new Date();
+    const dateStr = date.toTimeString().slice(0, 8);
+    this.setState(s => ({ log: [`[${dateStr}.${date.valueOf() % 1000}] ${msg}`, ...s.log] }));
   }
   componentDidMount() {
-    kclient.connect();
+    this.props.client.connect();
   }
 
-  onSubscribeClick = () => {
+  onSubscribeClick = async () => {
     const { pair } = this.state;
 
-    kclient.subscribeToTrades(pair, newTrades => {
+    this.log(`Subscribing to trades for: ${pair}`);
+    await this.props.client.subscribeToTrades(pair, newTrades => {
       const existingTrades = this.state.trades.slice(
         0,
         this.props.maxNumberOfTrades - newTrades.length,
@@ -42,7 +46,7 @@ export class KrakenClientRig extends React.Component<Props, State> {
 
   onUnSubscribeClick = () => {
     const { pair } = this.state;
-    kclient.unsubscribeTrades(pair);
+    this.props.client.unsubscribeTrades(pair);
     this.log(`Unsubscribed trades for: ${pair}`);
   };
 
@@ -61,28 +65,7 @@ export class KrakenClientRig extends React.Component<Props, State> {
           <button onClick={this.onUnSubscribeClick}>Unsubscribe</button>
         </ButtonSection>
         <div style={{ display: "flex" }}>
-          <TableContainer>
-            <table>
-              <thead>
-                <tr>
-                  <th>Symbol</th>
-                  <th>Time</th>
-                  <th>Price</th>
-                  <th>Volume</th>
-                </tr>
-              </thead>
-              <tbody>
-                {trades.map(t => (
-                  <tr key={`${t.symbol}_${t.time}_${t.volume}`}>
-                    <td>{t.symbol}</td>
-                    <td>{t.time}</td>
-                    <td>{t.price}</td>
-                    <td>{t.volume}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </TableContainer>
+          <TradesTable trades={trades} />
           <Log>
             <ul>
               {log.map(entry => (
@@ -95,6 +78,31 @@ export class KrakenClientRig extends React.Component<Props, State> {
     );
   }
 }
+
+const TradesTable: React.FC<{ trades: KrakenTrade[] }> = ({ trades }) => (
+  <TableContainer>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Time</th>
+          <th>Price</th>
+          <th>Volume</th>
+        </tr>
+      </thead>
+      <tbody>
+        {trades.map(t => (
+          <tr key={`${t.symbol}_${t.time}_${t.volume}`}>
+            <td>{t.symbol}</td>
+            <td>{t.time}</td>
+            <td>{t.price}</td>
+            <td>{t.volume}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </TableContainer>
+);
 
 const Log = styled("div")`
   flex: 1;

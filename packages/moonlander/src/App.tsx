@@ -8,7 +8,7 @@ import React, { Component, Suspense } from "react";
 import { PDSClient } from "./client";
 import { KrakenClientRig } from "./rigs/clientRig";
 
-const client = new PDSClient();
+const pdsClient = new PDSClient();
 const kclient = new KrakenClient({ sandbox: true });
 
 class App extends Component {
@@ -16,12 +16,12 @@ class App extends Component {
     return (
       <div className="App">
         <Suspense fallback={<h2>Loading</h2>}>
-          <Button label={Core} onClick={() => client.init()}>
+          <Button label={Core} onClick={() => pdsClient.init()}>
             Init PDS client (open console)
           </Button>
           <Button
             onClick={async () => {
-              const ob = await client.getOrderBookSnapshot("kraken", {
+              const ob = await pdsClient.getOrderBookSnapshot("kraken", {
                 token: "xbt",
                 quote: "eur",
                 symbol: "XBT/EUR",
@@ -31,7 +31,7 @@ class App extends Component {
           >
             Get orderbook
           </Button>
-          <KrakenClientRig maxNumberOfTrades={30} />
+          <KrakenClientRig client={kclient} maxNumberOfTrades={30} />
         </Suspense>
       </div>
     );
@@ -39,9 +39,9 @@ class App extends Component {
 }
 
 //@ts-ignore
-window.client = client;
+window.client = pdsClient;
 //@ts-ignore
 window.kclient = kclient;
-kclient.connect();
+// kclient.connect();
 
 export default App;
