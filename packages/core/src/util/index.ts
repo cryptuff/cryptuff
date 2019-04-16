@@ -1,1 +1,1 @@
-export { sleep } from "./asyncUtils";
+export { sleep, getDeferredPromise } from "./asyncUtils";

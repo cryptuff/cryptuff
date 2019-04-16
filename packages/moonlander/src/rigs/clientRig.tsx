@@ -34,14 +34,19 @@ export class KrakenClientRig extends React.Component<Props, State> {
     const { pair } = this.state;
 
     this.log(`Subscribing to trades for: ${pair}`);
-    await this.props.client.subscribeToTrades(pair, newTrades => {
+    const isSubscribed = await this.props.client.subscribeToTrades(pair, newTrades => {
       const existingTrades = this.state.trades.slice(
         0,
         this.props.maxNumberOfTrades - newTrades.length,
       );
       this.setState({ trades: [...newTrades, ...existingTrades] });
     });
-    this.log(`Subscribed to trades for: ${pair}`);
+    if (isSubscribed) {
+      this.log(`Subscribed to trades for: ${pair}`);
+    }
+    else {
+      this.log(`Error subscribing to trades for: ${pair}`);
+    }
   };
 
   onUnSubscribeClick = () => {

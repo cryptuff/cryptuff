@@ -1,9 +1,9 @@
 import WebSocket from "isomorphic-ws";
-import { sleep } from "../util";
+import { sleep, getDeferredPromise } from "../util";
 
 const PRODUCTION_ENDPOINT = "wss://ws.kraken.com";
 const SANDBOX_ENDPOINT = "wss://ws-sandbox.kraken.com";
-const KEEPALIVE_INTERVAL_MS = 15 * 1000;
+const KEEPALIVE_INTERVAL_MS = 55 * 1000;
 
 interface Message {
   reqId?: number;
@@ -15,17 +15,24 @@ interface Message {
   };
 }
 
+type OutboundEventType = "ping" | "subscribe" | "unsubscribe";
+
 type Options = {
   sandbox?: boolean;
 };
 
 export class KrakenClient {
   private endpoint = SANDBOX_ENDPOINT;
-  private ws?: WebSocket;
+  private ws!: WebSocket;
 
-  private nextReqId = 1;
+  private _nextReqId = 0;
+  private _runKeepAlive = false;
 
-  private reqIdsTempMap: { [reqid: number]: any } = {};
+  private get nextReqId(): number {
+    return ++this._nextReqId;
+  }
+
+  // private reqIdsTempMap: { [reqid: number]: any } = {};
 
   private handlers: {
     [channelID: string]: (x: any) => any;
@@ -36,28 +43,66 @@ export class KrakenClient {
     this.handlers = {};
   }
 
+  /**
+   * Sends the payload to the websocket and resolves with the channel when the confirmation is received
+   * @param payload payload
+   * @param event event to send, or 'subscribe' by default
+   * @returns A promise to be resolved with the channelID once received
+   */
+  private async sendRPC<TReturn = unknown, TPayload = any>(
+    payload: TPayload,
+    event: OutboundEventType = "subscribe",
+  ): Promise<[number, TReturn]> {
+    const requestReqId = this.nextReqId;
+    const { promise, resolve, reject } = getDeferredPromise<[number, TReturn]>();
+
+    const eventHandler = ({ data: rawData }: { data: WebSocket.Data }) => {
+      const data = JSON.parse(rawData as string);
+      if (!data || typeof data !== "object") {
+        return; // Not my message
+      }
+      const { reqid: responseReqId, channelID, ...payload } = data;
+
+      if (responseReqId === requestReqId) {
+        this.ws.removeEventListener("message", eventHandler);
+        if (payload.status === "error") {
+          reject(payload);
+        } else {
+          resolve([channelID, payload]);
+        }
+      }
+    };
+
+    this.ws.send(
+      JSON.stringify({
+        reqid: requestReqId,
+        event,
+        ...payload,
+      }),
+    );
+    this.ws.addEventListener("message", eventHandler);
+
+    return promise;
+  }
+
   async pingPong() {
-    const reqid = this.nextReqId++;
+    const [_, data] = await this.sendRPC<{ event: "pong" }>(null, "ping");
+    if (data.event !== "pong") {
+      throw Error("Pong not received!");
+      debugger;
+    }
+    return;
+  }
 
-    return new Promise((res, rej) => {
-      this.reqIdsTempMap[reqid] = (msg: any) => {
-        delete this.reqIdsTempMap[reqid];
-        res();
-      };
-
-      this.ws!.send(
-        JSON.stringify({
-          reqid,
-          event: "ping",
-        }),
-      );
-    });
+  async stopKeepAliveLoop() {
+    this._runKeepAlive = false;
   }
 
   async startKeepAliveLoop() {
-    while (true) {
+    this._runKeepAlive = true;
+    while (this._runKeepAlive) {
       await sleep(KEEPALIVE_INTERVAL_MS);
-      if (this.ws!.readyState === WebSocket.OPEN) {
+      if (this.ws.readyState === WebSocket.OPEN) {
         const t0 = performance.now();
         await this.pingPong();
         const t1 = performance.now();
@@ -68,8 +113,9 @@ export class KrakenClient {
 
   connect() {
     return new Promise((resolve, reject) => {
-      this.ws = new WebSocket(this.endpoint);
-      this.ws.onmessage = this.onMessage;
+      (window as any).ws = this.ws = new WebSocket(this.endpoint);
+      this.ws.addEventListener("message", this.onMessage);
+      // this.ws.onmessage = this.onMessage;
       this.ws.onerror = ({ error, message }) => reject(`${message}\n${JSON.stringify(error)}`);
       this.ws.onclose = event => console.log(`Connection closed! Details:`, event);
       this.ws.onopen = ev => {
@@ -93,59 +139,63 @@ export class KrakenClient {
     if (data && data.event === "heartbeat") return;
 
     // Subscription confirmation message
-    if (data.reqid && this.reqIdsTempMap[data.reqid]) {
-      this.reqIdsTempMap[data.reqid](data);
-      return;
-    }
+    // ! Now handled by sendRPC
+    // if (data.reqid && this.reqIdsTempMap[data.reqid]) {
+    //   this.reqIdsTempMap[data.reqid](data);
+    //   return;
+    // }
 
     // Data message
     if (Array.isArray(data) && typeof data[0] === "number") {
-      const reqId = data[0].toString();
-      const handler = this.handlers[reqId];
-      handler(data[1]);
+      const [channel, otherData] = data;
+      const handler = this.handlers[channel];
+      handler(otherData);
     }
   };
 
-  private subscribe = <T = any>(
-    payload: Message,
-    dataCallback: (data: T) => void,
-    onSubscribeSuccess?: () => void,
-  ) => {
+  private async subscribe<T = any>(payload: Message, onDataReceived: (data: T) => void) {
     if (!this.ws) {
       throw new Error("WebSocket connection not established");
     }
 
-    const reqid = this.nextReqId++;
+    try {
+      const [channelID, response] = await this.sendRPC(payload, "subscribe");
+      this.handlers[channelID] = onDataReceived;
+      return true;
+    } catch (err) {
+      //TODO: log? reject? what!?
+      return false;
+    }
+  }
 
-    this.reqIdsTempMap[reqid] = (msg: any) => {
-      this.handlers[msg.channelID] = dataCallback;
-
-      delete this.reqIdsTempMap[reqid];
-      onSubscribeSuccess && onSubscribeSuccess();
-    };
-
-    this.ws.send(
-      JSON.stringify({
-        ...payload,
-        reqid,
-        event: "subscribe",
-      }),
+  async unsubscribeByChannel(channelID: number) {
+    const [_, confirmation] = await this.sendRPC<Kraken.InboundMessages.SubscriptionStatus>(
+      { channelID },
+      "unsubscribe",
     );
+    if (confirmation.status === "unsubscribed") {
+      delete this.handlers[channelID];
+      // TODO: return promise and resolve/reject instead?
+      return true;
+    }
+    return false;
+  }
 
-    // return an unsubscribe fn
-    return () => {
-      this.unsubscribe(payload);
-    };
-  };
-  unsubscribe = (payload: Message) => {
-    if (!this.ws) return;
-    this.ws.send(
-      JSON.stringify({
-        ...payload,
-        event: "unsubscribe",
-      }),
+  async unsubscribeByPayload(payload: Message) {
+    if (!this.ws) {
+      throw new Error("WebSocket connection not established");
+    }
+    const [channelID, confirmation] = await this.sendRPC<Kraken.InboundMessages.SubscriptionStatus>(
+      payload,
+      "unsubscribe",
     );
-  };
+    if (confirmation.status === "unsubscribed") {
+      delete this.handlers[channelID];
+      // TODO: return promise and resolve/reject instead?
+      return true;
+    }
+    return false;
+  }
 
   subscribeToOrderBook = (symbol: string, callback: (data: any) => void) => {
     const payload: Message = {
@@ -158,38 +208,33 @@ export class KrakenClient {
     return unsubscribe;
   };
 
-  subscribeToTrades = (
+  subscribeToTrades(
     symbol: string,
     callback: (data: Kraken.InboundMessages.Trade[]) => void,
-  ): Promise<void> => {
+  ): Promise<boolean> {
     const payload: Message = {
       pair: [symbol],
       subscription: { name: "trade" },
     };
 
-    return new Promise((res, rej) => {
-      this.subscribe(
-        payload,
-        (data: Array<string[]>) => {
-          const trades = data.map<Kraken.InboundMessages.Trade>(tradeArr => ({
-            symbol,
-            price: tradeArr[0],
-            volume: tradeArr[1],
-            time: tradeArr[2],
-          }));
-          callback(trades);
-        },
-        res,
-      );
+    return this.subscribe<Array<string[]>>(payload, data => {
+      const trades = data.map<Kraken.InboundMessages.Trade>(tradeArr => ({
+        symbol,
+        price: tradeArr[0],
+        volume: tradeArr[1],
+        time: tradeArr[2],
+      }));
+      callback(trades);
     });
-  };
-  unsubscribeTrades = (symbol: string) => {
+  }
+
+  unsubscribeTrades(symbol: string) {
     const payload: Message = {
       pair: [symbol],
       subscription: { name: "trade" },
     };
-    return this.unsubscribe(payload);
-  };
+    return this.unsubscribeByPayload(payload);
+  }
 }
 
 export namespace Kraken {
