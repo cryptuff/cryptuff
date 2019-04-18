@@ -17,3 +17,11 @@ export interface OrderBookSnapshot {
 export interface OrderBookDelta extends OrderBookEntry {
   timestamp: Timestamp;
 }
+
+export interface OrderBookDeltaSet {
+  exchange: Exchange;
+  instrument: Instrument;
+  asks: OrderBookDelta[];
+  bids: OrderBookDelta[];
+  lastUpdated: Timestamp;
+}

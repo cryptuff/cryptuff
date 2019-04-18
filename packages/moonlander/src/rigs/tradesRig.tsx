@@ -1,4 +1,5 @@
-import { KrakenClient, KrakenTrade, Kraken } from "@cryptuff/core";
+import { KrakenClient, msToTimeString } from "@cryptuff/core";
+import { MarketTrade } from "@cryptuff/core/lib/models";
 import React from "react";
 import styled from "styled-components";
 
@@ -10,13 +11,13 @@ interface Props {
 }
 interface State {
   pair: string;
-  trades: KrakenTrade[];
+  trades: MarketTrade[];
   log: string[];
 }
 
-export class KrakenClientRig extends React.Component<Props, State> {
+export class KrakenTradesRig extends React.Component<Props, State> {
   state: State = {
-    pair: "",
+    pair: "BTC/EUR",
     trades: [],
     log: [],
   };
@@ -34,19 +35,14 @@ export class KrakenClientRig extends React.Component<Props, State> {
     const { pair } = this.state;
 
     this.log(`Subscribing to trades for: ${pair}`);
-    const isSubscribed = await this.props.client.subscribeToTrades(pair, newTrades => {
+    const channelID = await this.props.client.subscribeToTrades(pair, newTrades => {
       const existingTrades = this.state.trades.slice(
         0,
         this.props.maxNumberOfTrades - newTrades.length,
       );
       this.setState({ trades: [...newTrades, ...existingTrades] });
     });
-    if (isSubscribed) {
-      this.log(`Subscribed to trades for: ${pair}`);
-    }
-    else {
-      this.log(`Error subscribing to trades for: ${pair}`);
-    }
+    this.log(`Subscribed to trades for: ${pair} on channel ${channelID}`);
   };
 
   onUnSubscribeClick = () => {
@@ -84,7 +80,7 @@ export class KrakenClientRig extends React.Component<Props, State> {
   }
 }
 
-const TradesTable: React.FC<{ trades: KrakenTrade[] }> = ({ trades }) => (
+const TradesTable: React.FC<{ trades: MarketTrade[] }> = ({ trades }) => (
   <TableContainer>
     <table>
       <thead>
@@ -97,9 +93,9 @@ const TradesTable: React.FC<{ trades: KrakenTrade[] }> = ({ trades }) => (
       </thead>
       <tbody>
         {trades.map(t => (
-          <tr key={`${t.symbol}_${t.time}_${t.volume}`}>
-            <td>{t.symbol}</td>
-            <td>{t.time}</td>
+          <tr key={`${t.exchange}_${t.instrument.symbol}_${t.timestamp}_${t.volume}`}>
+            <td>{t.instrument.symbol}</td>
+            <td>{msToTimeString(t.timestamp)}</td>
             <td>{t.price}</td>
             <td>{t.volume}</td>
           </tr>

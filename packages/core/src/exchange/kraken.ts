@@ -1,9 +1,17 @@
 import WebSocket from "isomorphic-ws";
 import { sleep, getDeferredPromise } from "../util";
+import { MarketTrade, OrderBookSnapshot, OrderBookDeltaSet } from "src/models";
+import { timestampToMilliseconds } from "../util";
+import { RequireAtLeastOne } from "../util/typeUtils";
 
 const PRODUCTION_ENDPOINT = "wss://ws.kraken.com";
 const SANDBOX_ENDPOINT = "wss://ws-sandbox.kraken.com";
 const KEEPALIVE_INTERVAL_MS = 55 * 1000;
+
+const logger = {
+  log: console.log.bind(console),
+  error: console.error.bind(console),
+};
 
 interface Message {
   reqId?: number;
@@ -16,6 +24,8 @@ interface Message {
 }
 
 type OutboundEventType = "ping" | "subscribe" | "unsubscribe";
+
+type ConnectionStatus = "connecting" | "connected" | "closing" | "closed" | "unknown";
 
 type Options = {
   sandbox?: boolean;
@@ -41,6 +51,21 @@ export class KrakenClient {
   constructor(options: Options) {
     this.endpoint = options.sandbox ? SANDBOX_ENDPOINT : PRODUCTION_ENDPOINT;
     this.handlers = {};
+  }
+
+  public get connectionStatus(): ConnectionStatus {
+    if (!this.ws) return "unknown";
+    switch (this.ws.readyState) {
+      case WebSocket.OPEN:
+        return "connected";
+      case WebSocket.CONNECTING:
+        return "connecting";
+      case WebSocket.CLOSING:
+        return "closing";
+      case WebSocket.CLOSED:
+        return "closed";
+    }
+    return "unknown";
   }
 
   /**
@@ -88,8 +113,8 @@ export class KrakenClient {
   async pingPong() {
     const [_, data] = await this.sendRPC<{ event: "pong" }>(null, "ping");
     if (data.event !== "pong") {
-      throw Error("Pong not received!");
       debugger;
+      throw Error("Pong not received!");
     }
     return;
   }
@@ -99,36 +124,48 @@ export class KrakenClient {
   }
 
   async startKeepAliveLoop() {
+    if (this._runKeepAlive) return;
+
     this._runKeepAlive = true;
     while (this._runKeepAlive) {
       await sleep(KEEPALIVE_INTERVAL_MS);
-      if (this.ws.readyState === WebSocket.OPEN) {
+      if (this.connectionStatus === "connected") {
         const t0 = performance.now();
         await this.pingPong();
         const t1 = performance.now();
-        console.log(`ponged after ${Math.floor(t1 - t0)} ms.`);
+        logger.log(`ponged after ${Math.floor(t1 - t0)} ms.`);
       }
     }
   }
 
-  connect() {
+  connect(): Promise<void> {
+    if (this.connectionStatus === "connected") {
+      return Promise.resolve();
+    }
+
     return new Promise((resolve, reject) => {
       (window as any).ws = this.ws = new WebSocket(this.endpoint);
       this.ws.addEventListener("message", this.onMessage);
       // this.ws.onmessage = this.onMessage;
       this.ws.onerror = ({ error, message }) => reject(`${message}\n${JSON.stringify(error)}`);
-      this.ws.onclose = event => console.log(`Connection closed! Details:`, event);
+      this.ws.onclose = event => logger.log(`Connection closed! Details:`, event);
       this.ws.onopen = ev => {
-        console.log(`Connection opened!`, ev);
-        resolve(ev);
+        logger.log(`Connection opened!`, ev);
+        resolve();
         this.startKeepAliveLoop();
       };
     });
   }
 
   disconnect() {
-    if (!this.ws) throw new Error("Already disconnected!");
+    if (!this.ws) {
+      throw new Error(`websocket object is ${this.ws}!`);
+    }
+    if (this.connectionStatus !== "connected") {
+      return this.connectionStatus;
+    }
     this.ws.close();
+    return null;
   }
 
   private messageBroker(event: any) {}
@@ -161,18 +198,15 @@ export class KrakenClient {
     try {
       const [channelID, response] = await this.sendRPC(payload, "subscribe");
       this.handlers[channelID] = onDataReceived;
-      return true;
+      return channelID;
     } catch (err) {
       //TODO: log? reject? what!?
-      return false;
+      return -1;
     }
   }
 
   async unsubscribeByChannel(channelID: number) {
-    const [_, confirmation] = await this.sendRPC<Kraken.InboundMessages.SubscriptionStatus>(
-      { channelID },
-      "unsubscribe",
-    );
+    const [_, confirmation] = await this.sendRPC<SubscriptionStatus>({ channelID }, "unsubscribe");
     if (confirmation.status === "unsubscribed") {
       delete this.handlers[channelID];
       // TODO: return promise and resolve/reject instead?
@@ -185,7 +219,7 @@ export class KrakenClient {
     if (!this.ws) {
       throw new Error("WebSocket connection not established");
     }
-    const [channelID, confirmation] = await this.sendRPC<Kraken.InboundMessages.SubscriptionStatus>(
+    const [channelID, confirmation] = await this.sendRPC<SubscriptionStatus>(
       payload,
       "unsubscribe",
     );
@@ -197,32 +231,75 @@ export class KrakenClient {
     return false;
   }
 
-  subscribeToOrderBook = (symbol: string, callback: (data: any) => void) => {
+  subscribeToOrderBook(
+    symbol: string,
+    snapshotCallback: (data: OrderBookSnapshot) => void,
+    deltaCallback: (data: OrderBookDeltaSet) => void,
+  ): Promise<number> {
     const payload: Message = {
       pair: [symbol],
       subscription: { name: "book" },
     };
 
-    const unsubscribe = this.subscribe(payload, callback);
+    return this.subscribe<KrakenOBSnapshotPayload | KrakenOBUpdatePayload>(payload, data => {
+      if (isOBSnapshot(data)) {
+        const snapshot: OrderBookSnapshot = {
+          exchange: "kraken",
+          instrument: { symbol },
+          lastUpdated: new Date().valueOf(),
+          asks: data.as.map(([price, volume, timestamp]) => ({
+            level: Number(price),
+            volume: Number(volume),
+          })),
+          bids: data.bs.map(([price, volume, timestamp]) => ({
+            level: Number(price),
+            volume: Number(volume),
+          })),
+        };
+        snapshotCallback(snapshot);
+      } else if (isOBUpdate(data)) {
+        const delta: OrderBookDeltaSet = {
+          exchange: "kraken",
+          instrument: { symbol },
+          lastUpdated: new Date().valueOf(),
+          asks: (data.a || []).map(([price, volume, timestamp]) => ({
+            level: Number(price),
+            volume: Number(volume),
+            timestamp: Number(timestamp),
+          })),
+          bids: (data.b || []).map(([price, volume, timestamp]) => ({
+            level: Number(price),
+            volume: Number(volume),
+            timestamp: Number(timestamp),
+          })),
+        };
+        deltaCallback(delta);
+      }
+    });
+  }
 
-    return unsubscribe;
-  };
+  unsubscribeOrderBook(symbol: string) {
+    const payload: Message = {
+      pair: [symbol],
+      subscription: { name: "book" },
+    };
+    return this.unsubscribeByPayload(payload);
+  }
 
-  subscribeToTrades(
-    symbol: string,
-    callback: (data: Kraken.InboundMessages.Trade[]) => void,
-  ): Promise<boolean> {
+  subscribeToTrades(symbol: string, callback: (data: MarketTrade[]) => void): Promise<number> {
     const payload: Message = {
       pair: [symbol],
       subscription: { name: "trade" },
     };
 
-    return this.subscribe<Array<string[]>>(payload, data => {
-      const trades = data.map<Kraken.InboundMessages.Trade>(tradeArr => ({
-        symbol,
-        price: tradeArr[0],
-        volume: tradeArr[1],
-        time: tradeArr[2],
+    return this.subscribe<TradeUpdate[]>(payload, data => {
+      const trades = data.map<MarketTrade>(tradeArr => ({
+        exchange: "kraken",
+        instrument: { symbol },
+        price: Number(tradeArr[0]),
+        volume: Number(tradeArr[1]),
+        timestamp: timestampToMilliseconds(tradeArr[2]),
+        // TODO: Add tradeArr[3..6]
       }));
       callback(trades);
     });
@@ -237,71 +314,73 @@ export class KrakenClient {
   }
 }
 
-export namespace Kraken {
-  export namespace InboundMessages {
-    export type Ping = {
-      event: "ping";
-      reqid?: number;
-    };
-    export type Pong = {
-      event: "pong";
-      reqid?: number;
-    };
+type Ping = {
+  event: "ping";
+  reqid?: number;
+};
 
-    export type Heartbeat = {
-      event: "heartbeat";
-    };
+type Pong = {
+  event: "pong";
+  reqid?: number;
+};
 
-    export type SystemStatus = {
-      event: "systemStatus";
-      connectionID: number;
-      status: "online" | "maintenance" | string;
-      version: string;
-    };
+type Heartbeat = {
+  event: "heartbeat";
+};
 
-    export type SubscriptionStatus = {
-      channelID: number;
-      event: "subscriptionStatus";
-      status: "subscribed" | "unsubscribed" | "error";
-      pair: string;
-      reqid?: number;
-      subscription: {
-        name: "ticker" | "ohlc" | "trade" | "book" | "spread" | "*";
-        interval?: 1 | 5 | 15 | 30 | 60 | 240 | 1440 | 10080 | 21600;
-        depth?: 10 | 25 | 100 | 500 | 1000;
-      };
-      errorMessage?: string;
-    };
+type SystemStatus = {
+  event: "systemStatus";
+  connectionID: number;
+  status: "online" | "maintenance" | string;
+  version: string;
+};
 
-    export type LevelValue = [string, string, string]; // strings are floats
-    export type OrderBookSnapshot = [
-      number,
-      {
-        as: LevelValue[];
-        bs: LevelValue[];
-      }
-    ];
+type SubscriptionStatus = {
+  channelID: number;
+  event: "subscriptionStatus";
+  status: "subscribed" | "unsubscribed" | "error";
+  pair: string;
+  reqid?: number;
+  subscription: {
+    name: "ticker" | "ohlc" | "trade" | "book" | "spread" | "*";
+    interval?: 1 | 5 | 15 | 30 | 60 | 240 | 1440 | 10080 | 21600;
+    depth?: 10 | 25 | 100 | 500 | 1000;
+  };
+  errorMessage?: string;
+};
 
-    export interface Trade {
-      symbol: string;
-      time: string;
-      price: string;
-      volume: string;
-    }
+type TradeUpdate = [string, string, string, string, string, string];
 
-    export type OrderBookUpdate = [
-      number,
+type LevelValue = [string, string, string]; // strings are floats
 
-      { a: LevelValue[] } | { b: LevelValue[] } | { a: LevelValue[]; b: LevelValue[] }
-    ];
+interface KrakenOBSnapshotPayload {
+  as: LevelValue[];
+  bs: LevelValue[];
+}
 
-    export type InboundMessage =
-      | Ping
-      | Pong
-      | OrderBookUpdate
-      | OrderBookSnapshot
-      | SystemStatus
-      | SubscriptionStatus
-      | Heartbeat;
-  }
+interface KrakenOBUpdatePayload {
+  a?: LevelValue[];
+  b?: LevelValue[];
+}
+
+type InboundMessage =
+  | Ping
+  | Pong
+  | KrakenOBUpdatePayload
+  | KrakenOBSnapshotPayload
+  | SystemStatus
+  | SubscriptionStatus
+  | Heartbeat;
+
+function isOBSnapshot(
+  data: KrakenOBSnapshotPayload | KrakenOBUpdatePayload,
+): data is KrakenOBSnapshotPayload {
+  return Object.keys(data).includes("as");
+}
+
+function isOBUpdate(
+  data: KrakenOBSnapshotPayload | KrakenOBUpdatePayload,
+): data is KrakenOBUpdatePayload {
+  const keys = Object.keys(data);
+  return keys.includes("a") || keys.includes("b");
 }

@@ -1,10 +1,10 @@
 export * from "./interfaces";
 export * from "./models";
 export * from "./pdsmethods";
+export * from "./util";
 export { KrakenClient } from "./exchange/kraken";
-import { Kraken } from "./exchange/kraken";
-export { Kraken };
-export type KrakenTrade = Kraken.InboundMessages.Trade;
+
+export { RequireAtLeastOne, RequireOnlyOne } from "./util/typeUtils";
 
 export const CRYPTUFF_REALM = "com.cryptuff";
 export const Core = "7";

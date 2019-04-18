@@ -1,42 +1,57 @@
 import "./App.css";
 
 import { Button } from "@cryptuff/bitbobs";
-import { Core } from "@cryptuff/core";
 import { KrakenClient } from "@cryptuff/core";
 import React, { Component, Suspense } from "react";
 
 import { PDSClient } from "./client";
-import { KrakenClientRig } from "./rigs/clientRig";
+import { KrakenTradesRig } from "./rigs/tradesRig";
+import { OrderBookRig } from "./rigs/obRig";
+import styled from "styled-components";
 
 const pdsClient = new PDSClient();
 const kclient = new KrakenClient({ sandbox: true });
 
-class App extends Component {
+const views = ["Trades", "OB"];
+
+interface State {
+  view: number;
+}
+
+class App extends Component<null, State> {
+  state = {
+    view: 0,
+  };
+  toggleView = () => {
+    this.setState({ view: 1 - this.state.view });
+  };
   render() {
+    const { view } = this.state;
     return (
       <div className="App">
         <Suspense fallback={<h2>Loading</h2>}>
-          <Button label={Core} onClick={() => pdsClient.init()}>
+          <Button onClick={() => pdsClient.init()}>
             Init PDS client (open console)
           </Button>
-          <Button
-            onClick={async () => {
-              const ob = await pdsClient.getOrderBookSnapshot("kraken", {
-                token: "xbt",
-                quote: "eur",
-                symbol: "XBT/EUR",
-              });
-              console.log(ob);
-            }}
-          >
-            Get orderbook
+          <Button onClick={this.toggleView}>
+            View [{views[view]}]. Click to show {views[1 - view]}
           </Button>
-          <KrakenClientRig client={kclient} maxNumberOfTrades={30} />
+
+          <Widget visible={view === 0}>
+            <KrakenTradesRig client={kclient} maxNumberOfTrades={30} />
+          </Widget>
+          <Widget visible={view === 1}>
+            <OrderBookRig client={kclient} maxNumberOfEntries={10} />
+          </Widget>
         </Suspense>
       </div>
     );
   }
 }
+
+const Widget = styled.div<{ visible: boolean }>`
+  display: ${({ visible }) => (visible ? "block" : "none")};
+`;
 
 //@ts-ignore
 window.client = pdsClient;
