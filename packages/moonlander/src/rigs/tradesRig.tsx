@@ -1,13 +1,11 @@
-import { KrakenClient, msToTimeString } from "@cryptuff/core";
+import { KrakenWSClient, msToTimeString } from "@cryptuff/core";
 import { MarketTrade } from "@cryptuff/core/lib/models";
 import React from "react";
 import styled from "styled-components";
 
-// const kclient = new KrakenClient({ sandbox: true });
-
 interface Props {
   maxNumberOfTrades: number;
-  client: KrakenClient;
+  client: KrakenWSClient;
 }
 interface State {
   pair: string;

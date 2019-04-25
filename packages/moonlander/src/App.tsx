@@ -1,7 +1,7 @@
 import "./App.css";
 
 import { Button } from "@cryptuff/bitbobs";
-import { KrakenClient } from "@cryptuff/core";
+import { KrakenWSClient, KrakenRestClient } from "@cryptuff/core";
 import React, { Component, Suspense } from "react";
 
 import { PDSClient } from "./client";
@@ -10,7 +10,8 @@ import { OrderBookRig } from "./rigs/obRig";
 import styled from "styled-components";
 
 const pdsClient = new PDSClient();
-const kclient = new KrakenClient({ sandbox: true });
+const kclient = new KrakenWSClient({ sandbox: true });
+const kRestClient = new KrakenRestClient();
 
 const views = ["Trades", "OB"];
 
@@ -18,7 +19,7 @@ interface State {
   view: number;
 }
 
-class App extends Component<null, State> {
+class App extends Component<{}, State> {
   state = {
     view: 0,
   };
@@ -57,6 +58,7 @@ const Widget = styled.div<{ visible: boolean }>`
 window.client = pdsClient;
 //@ts-ignore
 window.kclient = kclient;
-// kclient.connect();
+//@ts-ignore
+window.kRestClient = kRestClient;
 
 export default App;

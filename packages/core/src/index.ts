@@ -2,7 +2,8 @@ export * from "./interfaces";
 export * from "./models";
 export * from "./pdsmethods";
 export * from "./util";
-export { KrakenClient } from "./exchange/kraken";
+export { KrakenWSClient } from "./exchange/kraken/kraken-ws-client";
+export { KrakenRestClient } from "./exchange/kraken/kraken-rest-client";
 
 export { RequireAtLeastOne, RequireOnlyOne } from "./util/typeUtils";
 

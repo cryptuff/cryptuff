@@ -1,8 +1,8 @@
 import WebSocket from "isomorphic-ws";
-import { sleep, getDeferredPromise } from "../util";
+import { sleep, getDeferredPromise } from "../../util";
 import { MarketTrade, OrderBookSnapshot, OrderBookDeltaSet } from "src/models";
-import { timestampToMilliseconds } from "../util";
-import { RequireAtLeastOne } from "../util/typeUtils";
+import { timestampToMilliseconds } from "../../util";
+import { RequireAtLeastOne } from "../../util/typeUtils";
 
 const PRODUCTION_ENDPOINT = "wss://ws.kraken.com";
 const SANDBOX_ENDPOINT = "wss://ws-sandbox.kraken.com";
@@ -31,12 +31,13 @@ type Options = {
   sandbox?: boolean;
 };
 
-export class KrakenClient {
+export class KrakenWSClient {
   private endpoint = SANDBOX_ENDPOINT;
   private ws!: WebSocket;
 
   private _nextReqId = 0;
   private _runKeepAlive = false;
+  private _lastHeartbeatReceived = 0;
 
   private get nextReqId(): number {
     return ++this._nextReqId;
@@ -146,7 +147,6 @@ export class KrakenClient {
     return new Promise((resolve, reject) => {
       (window as any).ws = this.ws = new WebSocket(this.endpoint);
       this.ws.addEventListener("message", this.onMessage);
-      // this.ws.onmessage = this.onMessage;
       this.ws.onerror = ({ error, message }) => reject(`${message}\n${JSON.stringify(error)}`);
       this.ws.onclose = event => logger.log(`Connection closed! Details:`, event);
       this.ws.onopen = ev => {
@@ -168,19 +168,16 @@ export class KrakenClient {
     return null;
   }
 
-  private messageBroker(event: any) {}
+  private onHeartbeatReceived() {
+    this._lastHeartbeatReceived = new Date().valueOf();
+  }
 
   private onMessage = ({ data: rawData }: { data: WebSocket.Data }) => {
     const data = JSON.parse(rawData as string);
 
-    if (data && data.event === "heartbeat") return;
-
-    // Subscription confirmation message
-    // ! Now handled by sendRPC
-    // if (data.reqid && this.reqIdsTempMap[data.reqid]) {
-    //   this.reqIdsTempMap[data.reqid](data);
-    //   return;
-    // }
+    if (data && data.event === "heartbeat") {
+      return this.onHeartbeatReceived();
+    }
 
     // Data message
     if (Array.isArray(data) && typeof data[0] === "number") {
@@ -335,6 +332,9 @@ type SystemStatus = {
   version: string;
 };
 
+type KrakenOBDepthValue = 10 | 25 | 100 | 500 | 1000;
+type KrakenOHLCInterval = 1 | 5 | 15 | 30 | 60 | 240 | 1440 | 10080 | 21600;
+
 type SubscriptionStatus = {
   channelID: number;
   event: "subscriptionStatus";
@@ -343,8 +343,8 @@ type SubscriptionStatus = {
   reqid?: number;
   subscription: {
     name: "ticker" | "ohlc" | "trade" | "book" | "spread" | "*";
-    interval?: 1 | 5 | 15 | 30 | 60 | 240 | 1440 | 10080 | 21600;
-    depth?: 10 | 25 | 100 | 500 | 1000;
+    interval?: KrakenOHLCInterval;
+    depth?: KrakenOBDepthValue;
   };
   errorMessage?: string;
 };
@@ -363,14 +363,14 @@ interface KrakenOBUpdatePayload {
   b?: LevelValue[];
 }
 
-type InboundMessage =
-  | Ping
-  | Pong
-  | KrakenOBUpdatePayload
-  | KrakenOBSnapshotPayload
-  | SystemStatus
-  | SubscriptionStatus
-  | Heartbeat;
+// type InboundMessage =
+//   | Ping
+//   | Pong
+//   | KrakenOBUpdatePayload
+//   | KrakenOBSnapshotPayload
+//   | SystemStatus
+//   | SubscriptionStatus
+//   | Heartbeat;
 
 function isOBSnapshot(
   data: KrakenOBSnapshotPayload | KrakenOBUpdatePayload,

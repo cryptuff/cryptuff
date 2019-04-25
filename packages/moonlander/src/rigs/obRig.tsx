@@ -1,11 +1,11 @@
-import { KrakenClient, msToTimeString } from "@cryptuff/core";
+import { KrakenWSClient, msToTimeString } from "@cryptuff/core";
 import { OrderBookSnapshot, OrderBookDelta, OrderBookEntry } from "@cryptuff/core/lib/models";
 import React from "react";
 import styled from "styled-components";
 
 interface Props {
   maxNumberOfEntries: number;
-  client: KrakenClient;
+  client: KrakenWSClient;
 }
 interface State {
   pair: string;
