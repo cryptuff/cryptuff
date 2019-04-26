@@ -10,8 +10,8 @@ import { OrderBookRig } from "./rigs/obRig";
 import styled from "styled-components";
 
 const pdsClient = new PDSClient();
-const kclient = new KrakenWSClient({ sandbox: true });
-const kRestClient = new KrakenRestClient();
+const kclient = new KrakenWSClient({ sandbox: false });
+const kRestClient = new KrakenRestClient('https://cors-anywhere.herokuapp.com/https://api.kraken.com');
 
 const views = ["Trades", "OB"];
 
@@ -55,7 +55,7 @@ const Widget = styled.div<{ visible: boolean }>`
 `;
 
 //@ts-ignore
-window.client = pdsClient;
+window.pdsClient = pdsClient;
 //@ts-ignore
 window.kclient = kclient;
 //@ts-ignore

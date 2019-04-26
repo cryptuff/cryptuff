@@ -23,9 +23,9 @@ export class KrakenRestClient {
    * version: 0 - API version
    * timeout: 5000 - Milliseconds before the request is interrupted
    **/
-  public constructor() {
+  public constructor(url: string = "https://api.kraken.com") {
     this.config = {
-      url: "https://api.kraken.com",
+      url,
       version: "0",
       timeout: 5000,
     };
@@ -299,8 +299,8 @@ export class KrakenRestClient {
   private async rawRequest(url: string, headers: { [k: string]: string }, params: any) {
     // Set custom User-Agent string
     headers = {
-      "User-Agent": "Kraken Typescript API Client",
-      "Access-Control-Allow-Origin": "*",
+      // "User-Agent": "Kraken Typescript API Client",
+      // "Access-Control-Allow-Origin": "*",
       ...headers,
     };
 

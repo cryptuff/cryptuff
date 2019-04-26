@@ -140,11 +140,15 @@ export class KrakenWSClient {
   }
 
   connect(): Promise<void> {
-    if (this.connectionStatus === "connected") {
-      return Promise.resolve();
-    }
-
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
+      if (this.connectionStatus === "connected") {
+        return resolve();
+      }
+      if (this.connectionStatus === "connecting") {
+        // Wait for connection and retry
+        await sleep(100);
+        return this.connect();
+      }
       (window as any).ws = this.ws = new WebSocket(this.endpoint);
       this.ws.addEventListener("message", this.onMessage);
       this.ws.onerror = ({ error, message }) => reject(`${message}\n${JSON.stringify(error)}`);
