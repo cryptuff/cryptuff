@@ -5,7 +5,7 @@ import { timestampToMilliseconds } from "../../util";
 import { RequireAtLeastOne } from "../../util/typeUtils";
 
 const PRODUCTION_ENDPOINT = "wss://ws.kraken.com";
-const SANDBOX_ENDPOINT = "wss://ws-sandbox.kraken.com";
+const BETA_ENDPOINT = "wss://ws-beta.kraken.com";
 const KEEPALIVE_INTERVAL_MS = 55 * 1000;
 
 const logger = {
@@ -28,11 +28,11 @@ type OutboundEventType = "ping" | "subscribe" | "unsubscribe";
 type ConnectionStatus = "connecting" | "connected" | "closing" | "closed" | "unknown";
 
 type Options = {
-  sandbox?: boolean;
+  beta?: boolean;
 };
 
 export class KrakenWSClient {
-  private endpoint = SANDBOX_ENDPOINT;
+  private endpoint = BETA_ENDPOINT;
   private ws!: WebSocket;
 
   private _nextReqId = 0;
@@ -50,7 +50,7 @@ export class KrakenWSClient {
   };
 
   constructor(options: Options) {
-    this.endpoint = options.sandbox ? SANDBOX_ENDPOINT : PRODUCTION_ENDPOINT;
+    this.endpoint = options.beta ? BETA_ENDPOINT : PRODUCTION_ENDPOINT;
     this.handlers = {};
   }
 
