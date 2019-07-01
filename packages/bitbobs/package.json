@@ -59,7 +59,7 @@
     "rollup-plugin-postcss": "^2.0.1",
     "rollup-plugin-url": "^2.1.0",
     "tslint": "^5.12.1",
-    "typescript": "^3.4.2"
+    "typescript": "^3.5.2"
   },
   "dependencies": {
     "styled-components": "4.1.3",
