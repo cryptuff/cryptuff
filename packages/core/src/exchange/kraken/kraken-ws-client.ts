@@ -1,8 +1,12 @@
 import WebSocket from "isomorphic-ws";
-import { sleep, getDeferredPromise } from "../../util";
-import { MarketTrade, OrderBookSnapshot, OrderBookDeltaSet } from "src/models";
-import { timestampToMilliseconds } from "../../util";
-import { RequireAtLeastOne } from "../../util/typeUtils";
+import {
+  sleep,
+  getDeferredPromise,
+  timeInMs,
+  timestampToMilliseconds,
+  RequireAtLeastOne,
+} from "../../util";
+import { MarketTrade, OrderBookSnapshot, OrderBookDeltaSet } from "../../models";
 
 const PRODUCTION_ENDPOINT = "wss://ws.kraken.com";
 const BETA_ENDPOINT = "wss://ws-beta.kraken.com";
@@ -131,9 +135,9 @@ export class KrakenWSClient {
     while (this._runKeepAlive) {
       await sleep(KEEPALIVE_INTERVAL_MS);
       if (this.connectionStatus === "connected") {
-        const t0 = performance.now();
+        const t0 = timeInMs();
         await this.pingPong();
-        const t1 = performance.now();
+        const t1 = timeInMs();
         logger.log(`ponged after ${Math.floor(t1 - t0)} ms.`);
       }
     }
@@ -149,7 +153,8 @@ export class KrakenWSClient {
         await sleep(100);
         return this.connect();
       }
-      (window as any).ws = this.ws = new WebSocket(this.endpoint);
+      //@ts-ignore
+      (typeof window !== "undefined" ? window : global).ws = this.ws = new WebSocket(this.endpoint);
       this.ws.addEventListener("message", this.onMessage);
       this.ws.onerror = ({ error, message }) => reject(`${message}\n${JSON.stringify(error)}`);
       this.ws.onclose = event => logger.log(`Connection closed! Details:`, event);

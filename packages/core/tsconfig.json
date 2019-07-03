@@ -8,7 +8,7 @@
     "declaration": true,
     "declarationMap": true,
     // "types": [],
-    // "lib": ["esnext", "dom"],
+    "lib": ["esnext"],
     "module": "commonjs"
   },
   "include": ["./typings/*", "./src/**/*.ts", "./src/**/*.tsx"]
