@@ -17,6 +17,6 @@ export function timestampToMilliseconds(ts: string) {
   return Number(ts) * 1000;
 }
 
-// @ts-ignore
 export const timeInMs =
+  // @ts-ignore
   typeof performance !== "undefined" ? () => Math.floor(performance.now()) : () => Date.now();

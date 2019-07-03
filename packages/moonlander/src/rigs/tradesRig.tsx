@@ -1,7 +1,7 @@
-import { KrakenWSClient, msToTimeString } from "@cryptuff/core";
-import { MarketTrade } from "@cryptuff/core/lib/models";
 import React from "react";
 import styled from "styled-components";
+
+import { MarketTrade, KrakenWSClient, msToTimeString } from "@cryptuff/core";
 
 interface Props {
   maxNumberOfTrades: number;
