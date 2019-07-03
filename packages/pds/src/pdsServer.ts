@@ -3,7 +3,7 @@ import {
   Exchange,
   Instrument,
   OrderBookSubscription,
-  KrakenClient,
+  KrakenWSClient,
   CRYPTUFF_REALM,
   OrderBookSnapshot,
   OrderBookDelta,
@@ -26,7 +26,7 @@ interface Register {
 export class PDSServer {
   private routerConnection: Connection;
   private routerSession?: Session;
-  private krakenClient: KrakenClient;
+  private krakenClient: KrakenWSClient;
 
   private register: Register;
 
@@ -37,7 +37,7 @@ export class PDSServer {
       url: this.routerUrl,
       realm: realm,
     });
-    this.krakenClient = new KrakenClient({ sandbox: true });
+    this.krakenClient = new KrakenWSClient({ beta: true });
     this.register = { orderbook: {} };
   }
 
@@ -97,15 +97,15 @@ export class PDSServer {
 
   async subscribeToOrderBook(exchange: Exchange, symbol: string) {
     if (exchange === "kraken") {
-      this.krakenClient.subscribeToOrderBook(symbol, data => {});
+      this.krakenClient.subscribeToOrderBook(symbol, data => {}, data => {});
     }
 
     throw new Error(`Exchange ${exchange} not supported`);
   }
 
   async onOrderBookRequest(_: any, { exchange, instrument }: OrderBookRequestParameters) {
-    const { token, quote, symbol } = instrument;
-    const key = `${exchange}__${token}/${quote}`;
+    const { symbol } = instrument;
+    const key = `${exchange}__${symbol}`;
     console.log(`Received order book request for ${key}`);
     var ob = this.register.orderbook[key];
     // WIP!!
@@ -117,5 +117,6 @@ export class PDSServer {
 
       // Return a promise or something?
     }
+    return;
   }
 }

@@ -13,8 +13,10 @@ var realm = "com.cryptuff";
 var topic = "com.cryptuff.pds";
 var getTickerProcedure = "com.cryptuff.pds.getTicker";
 
-(async () => {
+async function run() {
   var pdsServer = new PDSServer(routerUrl);
   await pdsServer.connectToExchanges();
   await pdsServer.connectToRouter();
-})();
+}
+
+// run();
