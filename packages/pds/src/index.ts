@@ -19,4 +19,5 @@ async function run() {
   await pdsServer.connectToRouter();
 }
 
+console.log("PDS is noop");
 // run();
