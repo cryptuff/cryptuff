@@ -7,13 +7,18 @@ import React, { Component, Suspense } from "react";
 import { PDSClient } from "./client";
 import { KrakenTradesRig } from "./rigs/tradesRig";
 import { OrderBookRig } from "./rigs/obRig";
+import { KrakenBalanceRig } from "./rigs/assetsRig";
 import styled from "styled-components";
 
 const pdsClient = new PDSClient();
 const kclient = new KrakenWSClient({ beta: false });
-const kRestClient = new KrakenRestClient('https://cors-anywhere.herokuapp.com/https://api.kraken.com');
+const kRestClient = new KrakenRestClient('https://api.kraken.com');
+kRestClient.setKey(process.env.REACT_APP_API_KEY as string);
+kRestClient.setSecret(process.env.REACT_APP_API_SECRET as string);
+// NOTE: Run Chrome canary with --disable-web-security --disable-gpu --user-data-dir=~/chromeTemp
+// const kRestClient = new KrakenRestClient('https://cors-anywhere.herokuapp.com/https://api.kraken.com');
 
-const views = ["Trades", "OB"];
+const views = ["Trades", "OB", "Assets/Balance"];
 
 interface State {
   view: number;
@@ -21,10 +26,10 @@ interface State {
 
 class App extends Component<{}, State> {
   state = {
-    view: 0,
+    view: 2,
   };
-  toggleView = () => {
-    this.setState({ view: 1 - this.state.view });
+  setView = (view: number) => {
+    this.setState({ view });
   };
   render() {
     const { view } = this.state;
@@ -34,15 +39,23 @@ class App extends Component<{}, State> {
           <Button onClick={() => pdsClient.init()}>
             Init PDS client (open console)
           </Button>
-          <Button onClick={this.toggleView}>
-            View [{views[view]}]. Click to show {views[1 - view]}
+          {" "}
+          Current View [{views[view]}]
+          <br/> 
+          {views.map((view, i) => (
+          <Button onClick={this.setView.bind(this, i)}>
+            Click to show {views[i]}
           </Button>
+          ))}
 
           <Widget visible={view === 0}>
             <KrakenTradesRig client={kclient} maxNumberOfTrades={30} />
           </Widget>
           <Widget visible={view === 1}>
             <OrderBookRig client={kclient} maxNumberOfEntries={10} />
+          </Widget>
+          <Widget visible={view === 2}>
+            <KrakenBalanceRig client={kRestClient} />
           </Widget>
         </Suspense>
       </div>
