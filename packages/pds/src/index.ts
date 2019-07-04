@@ -18,11 +18,11 @@ async function run() {
   // var pdsServer = new PDSServer(routerUrl);
   // await pdsServer.connectToExchanges();
   // await pdsServer.connectToRouter();
-  // var kraken = new KrakenRestClient();
-  // kraken.setKey(process.env.REACT_APP_KRAKEN_API_KEY!);
-  // kraken.setSecret(process.env.REACT_APP_KRAKEN_API_SECRET!);
-  // const balance = await kraken.getBalance();
-  // console.log(balance);
+  var kraken = new KrakenRestClient();
+  kraken.setKey(process.env.REACT_APP_KRAKEN_API_KEY!);
+  kraken.setSecret(process.env.REACT_APP_KRAKEN_API_SECRET!);
+  const balance = await kraken.getBalance();
+  console.log(balance);
 }
 
 // console.log("PDS is noop");

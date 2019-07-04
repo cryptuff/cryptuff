@@ -46,7 +46,7 @@ lib/
 dist/
 
 # TypeScript v1 declaration files
-typings/
+# typings/
 
 # Optional npm cache directory
 .npm

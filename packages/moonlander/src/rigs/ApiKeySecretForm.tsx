@@ -11,14 +11,18 @@ export const ApiKeySecretForm: React.FC<Props> = ({ onSubmit }) => {
 
   return (
     <div>
-      <label>Key
+      <Label>Key
         <input type="text" value={key} onChange={ev => setKey(ev.target.value)} />
-      </label>
+      </Label>
         
-      <label>Secret
+      <Label>Secret
         <input type="password" value={secret} onChange={ev => setSecret(ev.target.value)} />
-      </label>
+      </Label>
       <button onClick={() => onSubmit(key, secret)}>Set</button>
     </div>
   );
 };
+
+const Label = styled.label`
+  display: block;
+`;

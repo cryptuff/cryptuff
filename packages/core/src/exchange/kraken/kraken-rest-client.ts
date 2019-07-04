@@ -3,8 +3,9 @@
  */
 
 import axios, { AxiosRequestConfig } from "axios";
-import crypto from "isomorphic-crypto";
 import { LiteralUnion, querystringify } from "../../util";
+import * as encoding from "../../util/encoding";
+import * as crypto from "../../util/crypto";
 
 export class KrakenRestClient {
   private config: Config;
@@ -88,7 +89,7 @@ export class KrakenRestClient {
    * Returns the current Kraken server time as stated in https://www.kraken.com/help/api#get-server-time
    **/
   public getTime() {
-    return this.publicMethod("Time", null) as Promise<GetTimeResponse>;
+    return this.publicMethod("Time") as Promise<GetTimeResponse>;
   }
 
   /**
@@ -106,8 +107,11 @@ export class KrakenRestClient {
   /**
    * Returns the current Kraken asset pair infos as stated in https://www.kraken.com/help/api#get-tradable-pairs
    **/
-  public getAssetPairs(params: any) {
-    return this.publicMethod("AssetPairs", params);
+  public getAssetPairs(params: GetAssetPairsRequest = {}) {
+    const pairParams =
+      params.pairs && params.pairs.length > 0 ? { pair: params.pairs.join(",") } : null;
+
+    return this.publicMethod("AssetPairs", pairParams) as Promise<GetAssetPairsResponse>;
   }
 
   /**
@@ -151,7 +155,7 @@ export class KrakenRestClient {
    * This function requires the API key and secret to be set, otherwise an error will be thrown.
    **/
   public getBalance() {
-    return this.privateMethod("Balance", null);
+    return this.privateMethod("Balance");
   }
 
   /**
@@ -159,7 +163,7 @@ export class KrakenRestClient {
    *
    * This function requires the API key and secret to be set, otherwise an error will be thrown.
    **/
-  public getTradeBalance(params: any) {
+  public getTradeBalance(params?: GetTradeBalanceRequest) {
     return this.privateMethod("TradeBalance", params);
   }
 
@@ -194,7 +198,7 @@ export class KrakenRestClient {
   }
 
   public getOpenPositions(params: any) {
-    return this.privateMethod("OpenPositions", null);
+    return this.privateMethod("OpenPositions");
   }
 
   public getLedgers(params: any) {
@@ -245,50 +249,57 @@ export class KrakenRestClient {
     return this.privateMethod("WithdrawCancel", params);
   }
 
-  private publicMethod(method: string, params: object | null) {
+  private publicMethod(method: string, params: object | null = {}) {
     params = params || {};
     var url = `${this.config.url}/${this.config.version}/public/${method}`;
 
-    return this.rawRequest(url, {}, params);
+    return this.rawRequest(url, {}, querystringify(params));
   }
 
-  private privateMethod(method: string, params: (object & { nonce?: number }) | null) {
+  private privateMethod(method: string, params: object | null = {}) {
     if (!this.config.key || !this.config.secret) {
       throw new Error(
         `The API key or secret are not set: [key: ${this.config.key}, secret: ${this.config.secret}]`,
       );
     }
 
-    params = params || {};
-
     var path = `/${this.config.version}/private/${method}`;
     var url = this.config.url + path;
 
-    params.nonce = Date.now();
+    const nonce = Date.now();
+    const paramsWithNonce = { nonce, ...params };
+    const messageBody = querystringify(paramsWithNonce);
 
-    var signature = this.getMessageSignature(path, params, this.config.secret, params.nonce);
+    var signature = this.getMessageSignature(path, messageBody, this.config.secret, nonce);
 
     var headers = {
       "API-Key": this.config.key,
       "API-Sign": signature,
     };
 
-    return this.rawRequest(url, headers, params);
+    return this.rawRequest(url, headers, messageBody);
   }
 
-  private getMessageSignature(path: string, request: object, secret: string, nonce: number) {
-    var message = querystringify(request);
-    var secretBuf = new Buffer(secret, "base64");
-    var hash = crypto.createHash("sha256");
-    var hmac = crypto.createHmac("sha512", secretBuf);
+  /**
+   *
+   * @param path e.g. /0/private/Balance
+   * @param message Including nonce and *querystringified* e.g. nonce=1562254580075&asset=ZEUR
+   * @param secret API secret in Base-64 e.g. 32MXEi...jUA==
+   * @param nonce as a number e.g. 1562254580075
+   */
 
-    var hashDigest = hash.update(nonce + message).digest("binary" as any);
-    var hmacDigest = hmac.update(path + hashDigest, "binary" as any).digest("base64");
+  private getMessageSignature(path: string, message: string, secret: string, nonce: number) {
+    const binaryHash = crypto.sha256AsBinary(nonce + message);
+    const binaryPath = encoding.stringToBinary(path);
 
+    const binaryPathAndHash = encoding.binaryConcat(binaryPath, binaryHash);
+    const hmac = crypto.hmacSha512(binaryPathAndHash, secret);
+
+    const hmacDigest = encoding.binaryToBase64(hmac);
     return hmacDigest;
   }
 
-  private async rawRequest(url: string, headers: { [k: string]: string }, params: any) {
+  private async rawRequest(url: string, headers: { [k: string]: string }, body: string) {
     // Set custom User-Agent string
     headers = {
       // "User-Agent": "Kraken Typescript API Client",
@@ -304,7 +315,7 @@ export class KrakenRestClient {
       url,
       headers,
       // params: paramsWithoutNonce,
-      data: params,
+      data: body,
       timeout: this.config.timeout,
     };
 
@@ -367,4 +378,24 @@ interface GetAssetsResponse {
     decimals: number;
     display_decimals: number;
   };
+}
+
+interface GetAssetPairsRequest {
+  pairs?: string[];
+}
+
+interface GetAssetPairsResponse {
+  [pair: string]: {
+    altname: string;
+    wsname: string;
+    pair_decimals: number;
+    lot_decimals: number;
+    lot_multiplier: number;
+    leverage_buy: number[];
+    leverage_sell: number[];
+  };
+}
+
+interface GetTradeBalanceRequest {
+  asset?: KrakenAsset;
 }

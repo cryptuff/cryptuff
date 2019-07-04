@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 
-import { msToTimeString, KrakenRestClient, Unpacked, WellKnownFiatAssets } from "@cryptuff/core";
-import { ApiKeySecretForm } from "./ApiKeySecretForm";
+import { KrakenRestClient, WellKnownFiatAssets, Unpacked } from "@cryptuff/core";
 
 interface Props {
   client: KrakenRestClient;
@@ -10,61 +9,35 @@ interface Props {
 
 type BalanceSheet = { [coin: string]: number };
 type Assets = KResponse<"getAssets">;
-type Balance = KResponse<"getBalance">;
+type AssetPairs = KResponse<"getAssetPairs">;
 
 type KResponse<T extends keyof typeof KrakenRestClient.prototype> = Unpacked<
   (typeof KrakenRestClient.prototype)[T]
 >;
 
-export function KrakenBalanceRig({ client }: Props) {
-  const [balances, setBalances] = useState<BalanceSheet>({});
+export function KrakenAssetsRig({ client }: Props) {
+  const [pairs, setPairs] = useState<AssetPairs>({});
   const [assets, setAssets] = useState<Assets>({});
-  const [apiData, setApiData] = useState<[string, string]>([client.key!, client.secret!]);
 
   async function retrieveAssets() {
     const assets = await client.getAssets();
     setAssets(assets);
   }
 
-  async function retrieveBalances() {
-    let balance: Balance;
-    try {
-      balance = await client.getBalance();
-      setBalances((balance as unknown) as BalanceSheet);
-    } catch (e) {
-      console.error(e, (e as Error).stack);
-    }
-  }
-
-  function setClientApiKeys(key: string, secret: string) {
-    client.setKey(key);
-    client.setSecret(secret);
-    setApiData([key, secret]);
+  async function retrieveAssetPairs() {
+    const pairs = await client.getAssetPairs();
+    setPairs(pairs);
   }
 
   return (
     <Rig>
       <ButtonSection>
         <button onClick={retrieveAssets}>Assets</button>
-        <button onClick={retrieveBalances}>Balance</button>
+        <button onClick={retrieveAssetPairs}>Pairs</button>
       </ButtonSection>
       <div style={{ display: "flex" }}>
         <AssetsTable assets={assets} />
-        <TableContainer>
-          <ApiKeySecretForm onSubmit={(key, secret) => setClientApiKeys(key, secret)} />
-          {apiData && (
-            <div>
-              ApiData:
-              <br />
-              {apiData[0]}
-              <br />
-              <ApiPw>
-                {apiData[1]}
-              </ApiPw>
-            </div>
-          )}
-          <BalancesTable balances={balances} />
-        </TableContainer>
+        <AssetPairsTable pairs={pairs} />
       </div>
     </Rig>
   );
@@ -109,26 +82,30 @@ const AssetsTable: React.FC<{ assets: Assets }> = ({ assets }) => (
   </TableContainer>
 );
 
-const BalancesTable: React.FC<{ balances: BalanceSheet }> = ({ balances }) => (
-  <>
-    <h2>Kraken balance</h2>
+const AssetPairsTable: React.FC<{ pairs: AssetPairs }> = ({ pairs }) => (
+  <TableContainer>
+    <h2>Kraken asset pairs</h2>
     <table>
       <thead>
         <tr>
           <th>Symbol</th>
-          <th>Holdings</th>
+          <th>Altname</th>
+          <th>WS name</th>
+          <th>Pair decimals</th>
         </tr>
       </thead>
       <tbody>
-        {Object.entries(balances).map(([symbol, amount]) => (
-          <tr key={symbol}>
+        {Object.entries(pairs).map(([symbol, { altname, wsname, pair_decimals }]) => (
+          <tr key={symbol} style={isFiat(symbol) || isFiat(altname) ? { color: "goldenrod" } : {}}>
             <td>{symbol}</td>
-            <td>{amount}</td>
+            <td>{altname}</td>
+            <td>{wsname}</td>
+            <td>{pair_decimals}</td>
           </tr>
         ))}
       </tbody>
     </table>
-  </>
+  </TableContainer>
 );
 
 const Log = styled("div")`

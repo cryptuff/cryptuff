@@ -1,4 +1,4 @@
-import { LiteralUnion } from "src/util";
+import { LiteralUnion } from "../util";
 
 export type Timestamp = number;
 
