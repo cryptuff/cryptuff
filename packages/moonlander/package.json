@@ -16,7 +16,6 @@
     "@cryptuff/bitbobs": "^0.0.1",
     "@cryptuff/core": "^0.0.1",
     "autobahn": "^18.10.2",
-    "cors": "^2.8.5",
     "dotenv": "^7.0.0",
     "react-scripts": "3.0.1",
     "styled-components": "4.3.2"
