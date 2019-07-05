@@ -41,7 +41,7 @@ class App extends Component<{}, State> {
           View [{views[view]}]
           <br />
           {views.map((view, i) => (
-            <Button key={i} onClick={this.setView.bind(this, i)}>Click to show {views[i]}</Button>
+            <Button key={i} onClick={this.setView.bind(this, i)}>{view}</Button>
           ))}
           <Widget visible={view === 0} key={0}>
             <KrakenTradesRig client={kclient} maxNumberOfTrades={30} />
