@@ -270,7 +270,7 @@ export class KrakenRestClient {
     const paramsWithNonce = { nonce, ...params };
     const messageBody = querystringify(paramsWithNonce);
 
-    var signature = this.getMessageSignature(path, messageBody, this.config.secret, nonce);
+    var signature = this.getMessageSignature(path, nonce + messageBody, this.config.secret);
 
     var headers = {
       "API-Key": this.config.key,
@@ -281,15 +281,13 @@ export class KrakenRestClient {
   }
 
   /**
-   *
+   * Generates the `API-Sign` signature for private requests
    * @param path e.g. /0/private/Balance
    * @param message Including nonce and *querystringified* e.g. nonce=1562254580075&asset=ZEUR
    * @param secret API secret in Base-64 e.g. 32MXEi...jUA==
-   * @param nonce as a number e.g. 1562254580075
    */
-
-  private getMessageSignature(path: string, message: string, secret: string, nonce: number) {
-    const binaryHash = crypto.sha256AsBinary(nonce + message);
+  private getMessageSignature(path: string, message: string, secret: string) {
+    const binaryHash = crypto.sha256AsBinary(message);
     const binaryPath = encoding.stringToBinary(path);
 
     const binaryPathAndHash = encoding.binaryConcat(binaryPath, binaryHash);
