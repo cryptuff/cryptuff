@@ -7,10 +7,10 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "typeRoots": ["./typings", "node_modules/@types", "../../node_modules/@types"],
-    "paths": {
-      "*": ["./typings/*"]
-    },
+    // "typeRoots": ["./typings", "node_modules/@types", "../../node_modules/@types"],
+    // "paths": {
+    //   "*": ["./typings/*"]
+    // },
     "lib": ["esnext"],
     "module": "commonjs"
   },

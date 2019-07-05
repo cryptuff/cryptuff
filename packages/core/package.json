@@ -6,11 +6,11 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "clean": "rimraf ./lib",
-    "prebuild": "npm run clean",
+    "clean": "rimraf ./lib && rm tsconfig.tsbuildinfo",
+    "prebuild": "yarn run clean",
     "build:watch": "tsc --watch --preserveWatchOutput",
     "//prestart:dev": "npm run clean",
-    "start:dev": "npm run build:watch",
+    "start:dev": "yarn run build && yarn run build:watch",
     "test": "jest"
   },
   "author": "",

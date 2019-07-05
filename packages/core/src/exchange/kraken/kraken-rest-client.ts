@@ -155,7 +155,7 @@ export class KrakenRestClient {
    * This function requires the API key and secret to be set, otherwise an error will be thrown.
    **/
   public getBalance() {
-    return this.privateMethod("Balance");
+    return this.privateMethod<GetBalanceResponse>("Balance");
   }
 
   /**
@@ -164,7 +164,7 @@ export class KrakenRestClient {
    * This function requires the API key and secret to be set, otherwise an error will be thrown.
    **/
   public getTradeBalance(params?: GetTradeBalanceRequest) {
-    return this.privateMethod("TradeBalance", params);
+    return this.privateMethod<GetTradeBalanceResponse>("TradeBalance", params);
   }
 
   /**
@@ -249,14 +249,14 @@ export class KrakenRestClient {
     return this.privateMethod("WithdrawCancel", params);
   }
 
-  private publicMethod(method: string, params: object | null = {}) {
+  private publicMethod<TResponse = any>(method: string, params: object | null = {}) {
     params = params || {};
     var url = `${this.config.url}/${this.config.version}/public/${method}`;
 
-    return this.rawRequest(url, {}, querystringify(params));
+    return this.rawRequest<TResponse>(url, {}, querystringify(params));
   }
 
-  private privateMethod(method: string, params: object | null = {}) {
+  private privateMethod<TResponse = any>(method: string, params: object | null = {}) {
     if (!this.config.key || !this.config.secret) {
       throw new Error(
         `The API key or secret are not set: [key: ${this.config.key}, secret: ${this.config.secret}]`,
@@ -277,7 +277,7 @@ export class KrakenRestClient {
       "API-Sign": signature,
     };
 
-    return this.rawRequest(url, headers, messageBody);
+    return this.rawRequest<TResponse>(url, headers, messageBody);
   }
 
   /**
@@ -297,7 +297,11 @@ export class KrakenRestClient {
     return hmacDigest;
   }
 
-  private async rawRequest(url: string, headers: { [k: string]: string }, body: string) {
+  private async rawRequest<TResponse = any>(
+    url: string,
+    headers: { [k: string]: string },
+    body: string,
+  ) {
     // Set custom User-Agent string
     headers = {
       // "User-Agent": "Kraken Typescript API Client",
@@ -305,19 +309,15 @@ export class KrakenRestClient {
       ...headers,
     };
 
-    // let paramsWithoutNonce = { ...params };
-    // delete paramsWithoutNonce["nonce"];
-
     var options: AxiosRequestConfig = {
       method: "POST",
       url,
       headers,
-      // params: paramsWithoutNonce,
       data: body,
       timeout: this.config.timeout,
     };
 
-    const response = await axios(options);
+    const response = await axios.request<KrakenResponse<TResponse>>(options);
 
     if (response.status !== 200) {
       throw new Error(`Error in server response: ${JSON.stringify(response)}`);
@@ -330,14 +330,15 @@ export class KrakenRestClient {
     }
 
     if (data.error && data.error.length > 0) {
-      var krakenErrors = (data.error as string[])
-        .filter(e => e.startsWith("E"))
-        .map(e => e.substr(1));
+      var errors = data.error.filter(e => e.startsWith("E")).map(e => e.substr(1));
+      var warnings = data.error.filter(e => e.startsWith("W")).map(e => e.substr(1));
 
-      if (krakenErrors.length === 0) {
+      if (errors.length > 0) {
+        throw new Error(`Kraken API returned errors: ${errors.join("; ")}`);
+      } else if (warnings.length > 0) {
+        console.warn(warnings);
+      } else {
         throw new Error(`Kraken API returned an unknown error: ${JSON.stringify(data.error)}`);
-      } else if (krakenErrors.length > 0) {
-        throw new Error(`Kraken API returned errors: ${krakenErrors.join("; ")}`);
       }
     }
 
@@ -353,7 +354,7 @@ interface Config {
   secret?: string;
 }
 
-interface Response<T> {
+interface KrakenResponse<T> {
   error: string[];
   result: T;
 }
@@ -394,6 +395,30 @@ interface GetAssetPairsResponse {
   };
 }
 
+interface GetBalanceResponse {
+  [asset: string]: string;
+}
+
 interface GetTradeBalanceRequest {
   asset?: KrakenAsset;
+}
+
+interface GetTradeBalanceResponse {
+  /** eb = equivalent balance (combined balance of all currencies) */
+  eb: string;
+  /** tb = trade balance (combined balance of all equity currencies) */
+  tb: string;
+  /** m = margin amount of open positions */
+  m: string;
+  /** n = unrealized net profit/loss of open positions */
+  n: string;
+  /** c = cost basis of open positions */
+  c: string;
+  /** v = current floating valuation of open positions */
+  v: string;
+  /** e = equity = trade balance + unrealized net profit/loss */
+  e: string;
+  /** mf = free margin = equity - initial margin (maximum margin available to open new positions) */
+  mf: string;
+  /** ml = margin level = (equity / initial margin) * 100 */
 }

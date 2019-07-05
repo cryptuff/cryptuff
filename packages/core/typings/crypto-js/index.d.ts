@@ -1,5 +1,16 @@
+/**
+ * This file is essentially @types/cryptojs:
+ * https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/cryptojs/index.d.ts
+ *
+ * adding a couple of lines from @types/crypto-js:
+ * https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/crypto-js/index.d.ts
+ *
+ * to make it play nicely with Typescript
+ */
+
 export = CryptoJS;
 export as namespace CryptoJS;
+
 declare var CryptoJS: CryptoJS.CryptoJSStatic;
 
 declare namespace CryptoJS {
