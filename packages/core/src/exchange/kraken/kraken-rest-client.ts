@@ -4,8 +4,8 @@
 
 import axios, { AxiosRequestConfig } from "axios";
 import { LiteralUnion, querystringify } from "../../util";
-import * as encoding from "../../util/encoding";
-import * as crypto from "../../util/crypto";
+import { utf8ToBytes } from "../../util/encoding";
+import { sha256AsBytes, hmacSha512AsBase64Digest } from "../../util/crypto";
 
 export class KrakenRestClient {
   private config: Config;
@@ -287,13 +287,13 @@ export class KrakenRestClient {
    * @param secret API secret in Base-64 e.g. 32MXEi...jUA==
    */
   private getMessageSignature(path: string, message: string, secret: string) {
-    const binaryHash = crypto.sha256AsBinary(message);
-    const binaryPath = encoding.stringToBinary(path);
+    const hashBytes = sha256AsBytes(message);
+    const pathBytes = utf8ToBytes(path);
 
-    const binaryPathAndHash = encoding.binaryConcat(binaryPath, binaryHash);
-    const hmac = crypto.hmacSha512(binaryPathAndHash, secret);
+    const pathAndHashBytes = pathBytes.concat(hashBytes);
 
-    const hmacDigest = encoding.binaryToBase64(hmac);
+    const hmacDigest = hmacSha512AsBase64Digest(secret, pathAndHashBytes);
+
     return hmacDigest;
   }
 
