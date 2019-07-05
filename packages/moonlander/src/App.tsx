@@ -14,8 +14,8 @@ import { KrakenBalanceRig } from "./rigs/balanceRig";
 const pdsClient = new PDSClient();
 const kclient = new KrakenWSClient({ beta: false });
 const kRestClient = new KrakenRestClient("https://api.kraken.com");
-kRestClient.setKey(process.env.REACT_APP_KRAKEN_API_KEY as string);
-kRestClient.setSecret(process.env.REACT_APP_KRAKEN_API_SECRET as string);
+kRestClient.setKey(process.env.REACT_APP_KRAKEN_API_KEY);
+kRestClient.setSecret(process.env.REACT_APP_KRAKEN_API_SECRET);
 // NOTE: Run Chrome canary with --disable-web-security --disable-gpu --user-data-dir=~/chromeTemp
 // const kRestClient = new KrakenRestClient('https://cors-anywhere.herokuapp.com/https://api.kraken.com');
 
