@@ -7,7 +7,6 @@ interface Props {
   client: KrakenRestClient;
 }
 
-type BalanceSheet = { [coin: string]: number };
 type Assets = KResponse<"getAssets">;
 type AssetPairs = KResponse<"getAssetPairs">;
 
