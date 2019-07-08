@@ -41,17 +41,11 @@ class App extends Component<{}, State> {
                 path="/trades"
                 render={() => <KrakenTradesRig client={kWSClient} maxNumberOfTrades={30} />}
               />
-            </Switch>
-            <Switch>
               <Route
                 path="/ob"
                 render={() => <OrderBookRig client={kWSClient} maxNumberOfEntries={10} />}
               />
-            </Switch>
-            <Switch>
               <Route path="/assets" render={() => <KrakenAssetsRig client={kRestClient} />} />
-            </Switch>
-            <Switch>
               <Route path="/balance" render={() => <KrakenBalanceRig client={kRestClient} />} />
             </Switch>
           </BrowserRouter>
