@@ -94,10 +94,11 @@ export class KrakenRestClient {
 
   /**
    * Returns the current Kraken asset infos as stated in https://www.kraken.com/help/api#get-asset-info
+   *
+   * Note this returns deprecated assets, as a user could still have leftover balance
    **/
-  public getAssets(params: GetAssetsRequest = {}): Promise<GetAssetsResponse> {
-    const assetParams =
-      params.assets && params.assets.length > 0 ? { asset: params.assets.join(",") } : null;
+  public getAssets({ assets = undefined }: GetAssetsRequest = {}): Promise<GetAssetsResponse> {
+    const assetParams = assets && assets.length > 0 ? { asset: assets.join(",") } : null;
 
     return this.publicMethod("Assets", assetParams);
   }
@@ -105,11 +106,19 @@ export class KrakenRestClient {
   /**
    * Returns the current Kraken asset pair infos as stated in https://www.kraken.com/help/api#get-tradable-pairs
    **/
-  public getAssetPairs(params: GetAssetPairsRequest = {}): Promise<GetAssetPairsResponse> {
-    const pairParams =
-      params.pairs && params.pairs.length > 0 ? { pair: params.pairs.join(",") } : null;
+  public async getAssetPairs({
+    pairs = undefined,
+    includeDarkPool = false,
+  }: GetAssetPairsRequest = {}): Promise<GetAssetPairsResponse> {
+    const pairParams = pairs && pairs.length > 0 ? { pair: pairs.join(",") } : null;
 
-    return this.publicMethod("AssetPairs", pairParams);
+    const assetPairs = await this.publicMethod<GetAssetPairsResponse>("AssetPairs", pairParams);
+    if (!includeDarkPool) {
+      Object.keys(assetPairs)
+        .filter(pair => /\.d$/.test(pair))
+        .forEach(darkPoolPair => delete assetPairs[darkPoolPair]);
+    }
+    return assetPairs;
   }
 
   /**
@@ -381,6 +390,7 @@ interface GetAssetsResponse {
 
 interface GetAssetPairsRequest {
   pairs?: string[];
+  includeDarkPool?: boolean;
 }
 
 interface GetAssetPairsResponse {

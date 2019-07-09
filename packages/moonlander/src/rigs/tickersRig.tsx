@@ -13,7 +13,7 @@ export function KrakenTickersRig({ client }: Props) {
   const [tickers, setTickers] = useState<Tickers>({});
 
   async function retrieveTickers() {
-    const pairs = Object.keys(await client.getAssetPairs()).filter(pair => !/\.d$/.test(pair));
+    const pairs = Object.keys(await client.getAssetPairs());
 
     const tickers = await client.getTicker({ pairs });
     setTickers(tickers);
@@ -48,8 +48,8 @@ const Tickers: React.FC<{ tickers: Tickers }> = ({ tickers }) => (
           <tr key={symbol}>
             <td>{symbol}</td>
             <td>{aPrice} [{aVol}]</td>
-            <td>{bPrice} [{bVol}]</td>
             <td>{cPrice} [{cVol}]</td>
+            <td>{bPrice} [{bVol}]</td>
           </tr>
         ))}
       </tbody>
