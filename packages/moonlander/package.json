@@ -16,6 +16,8 @@
   "dependencies": {
     "@cryptuff/bitbobs": "^0.0.1",
     "@cryptuff/core": "^0.0.1",
+    "@reach/router": "^1.2.1",
+    "@types/reach__router": "^1.2.4",
     "autobahn": "^18.10.2",
     "dotenv": "^7.0.0",
     "node-sass": "^4.12.0",
