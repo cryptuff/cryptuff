@@ -88,37 +88,37 @@ export class KrakenRestClient {
   /**
    * Returns the current Kraken server time as stated in https://www.kraken.com/help/api#get-server-time
    **/
-  public getTime() {
-    return this.publicMethod("Time") as Promise<GetTimeResponse>;
+  public getTime(): Promise<GetTimeResponse> {
+    return this.publicMethod("Time");
   }
 
   /**
    * Returns the current Kraken asset infos as stated in https://www.kraken.com/help/api#get-asset-info
-   *
-   * @param {any} params An object containing the input data as stated in the API description
    **/
-  public getAssets(params: GetAssetsRequest = {}) {
+  public getAssets(params: GetAssetsRequest = {}): Promise<GetAssetsResponse> {
     const assetParams =
       params.assets && params.assets.length > 0 ? { asset: params.assets.join(",") } : null;
 
-    return this.publicMethod("Assets", assetParams) as Promise<GetAssetsResponse>;
+    return this.publicMethod("Assets", assetParams);
   }
 
   /**
    * Returns the current Kraken asset pair infos as stated in https://www.kraken.com/help/api#get-tradable-pairs
    **/
-  public getAssetPairs(params: GetAssetPairsRequest = {}) {
+  public getAssetPairs(params: GetAssetPairsRequest = {}): Promise<GetAssetPairsResponse> {
     const pairParams =
       params.pairs && params.pairs.length > 0 ? { pair: params.pairs.join(",") } : null;
 
-    return this.publicMethod("AssetPairs", pairParams) as Promise<GetAssetPairsResponse>;
+    return this.publicMethod("AssetPairs", pairParams);
   }
 
   /**
    * Returns the current Kraken ticker infos as stated in https://www.kraken.com/help/api#get-ticker-info
    **/
-  public getTicker(params: any) {
-    return this.publicMethod("Ticker", params);
+  public async getTicker(params: GetTickerRequest): Promise<GetTickerResponse> {
+    const pairParams = { pair: params.pairs.join(",") };
+
+    return this.publicMethod("Ticker", pairParams);
   }
 
   /**
@@ -154,8 +154,8 @@ export class KrakenRestClient {
    *
    * This function requires the API key and secret to be set, otherwise an error will be thrown.
    **/
-  public getBalance() {
-    return this.privateMethod<GetBalanceResponse>("Balance");
+  public getBalance(): Promise<GetBalanceResponse> {
+    return this.privateMethod("Balance");
   }
 
   /**
@@ -163,8 +163,8 @@ export class KrakenRestClient {
    *
    * This function requires the API key and secret to be set, otherwise an error will be thrown.
    **/
-  public getTradeBalance(params?: GetTradeBalanceRequest) {
-    return this.privateMethod<GetTradeBalanceResponse>("TradeBalance", params);
+  public getTradeBalance(params?: GetTradeBalanceRequest): Promise<GetTradeBalanceResponse> {
+    return this.privateMethod("TradeBalance", params);
   }
 
   /**
@@ -393,6 +393,34 @@ interface GetAssetPairsResponse {
     leverage_buy: number[];
     leverage_sell: number[];
   };
+}
+
+interface GetTickerRequest {
+  pairs: string[];
+}
+
+interface GetTickerResponseItem {
+  /** a = ask array(<price>, <whole lot volume>, <lot volume>), */
+  a: [string, string, string];
+  /** b = bid array(<price>, <whole lot volume>, <lot volume>), */
+  b: [string, string, string];
+  /** c = last trade closed array(<price>, <lot volume>), */
+  c: [string, string];
+  /** v = volume array(<today>, <last 24 hours>), */
+  v: [string, string];
+  /** p = volume weighted average price array(<today>, <last 24 hours>), */
+  p: [string, string];
+  /** t = number of trades array(<today>, <last 24 hours>), */
+  t: [number, number];
+  /** l = low array(<today>, <last 24 hours>), */
+  l: [string, string];
+  /** h = high array(<today>, <last 24 hours>), */
+  h: [string, string];
+  /** o = today's opening price */
+  o: string;
+}
+export interface GetTickerResponse {
+  [asset: string]: GetTickerResponseItem;
 }
 
 interface GetBalanceResponse {

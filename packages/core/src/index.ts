@@ -3,7 +3,7 @@ export * from "./models";
 export * from "./pdsmethods";
 export * from "./util";
 export { KrakenWSClient } from "./exchange/kraken/kraken-ws-client";
-export { KrakenRestClient } from "./exchange/kraken/kraken-rest-client";
+export * from "./exchange/kraken/kraken-rest-client";
 
 export const CRYPTUFF_REALM = "com.cryptuff";
 export const Core = "8";

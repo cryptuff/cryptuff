@@ -11,6 +11,7 @@ import { KrakenTradesRig } from "./rigs/tradesRig";
 import { OrderBookRig } from "./rigs/obRig";
 import { KrakenAssetsRig } from "./rigs/assetsRig";
 import { KrakenBalanceRig } from "./rigs/balanceRig";
+import { KrakenTickersRig } from './rigs/tickersRig';
 
 const pdsClient = new PDSClient();
 const kWSClient = new KrakenWSClient({ beta: false });
@@ -20,7 +21,7 @@ kRestClient.setSecret(process.env.REACT_APP_KRAKEN_API_SECRET);
 // NOTE: Run Chrome canary with --disable-web-security --disable-gpu --user-data-dir=~/chromeTemp
 // const kRestClient = new KrakenRestClient('https://cors-anywhere.herokuapp.com/https://api.kraken.com');
 
-const views = ["/trades", "/ob", "/assets", "/balance"];
+const views = ["/trades", "/ob", "/assets", "/tickers", "/balance"];
 
 interface State {}
 
@@ -47,6 +48,7 @@ class App extends Component<{}, State> {
               />
               <Route path="/assets" render={() => <KrakenAssetsRig client={kRestClient} />} />
               <Route path="/balance" render={() => <KrakenBalanceRig client={kRestClient} />} />
+              <Route path="/tickers" render={() => <KrakenTickersRig client={kRestClient} />} />
             </Switch>
           </BrowserRouter>
         </Suspense>
