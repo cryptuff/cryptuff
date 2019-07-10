@@ -6,7 +6,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "clean": "rimraf ./lib && rm tsconfig.tsbuildinfo",
+    "clean": "rimraf ./lib && rimraf tsconfig.tsbuildinfo",
     "prebuild": "yarn run clean",
     "build:watch": "tsc --watch --preserveWatchOutput",
     "//prestart:dev": "npm run clean",

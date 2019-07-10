@@ -11,7 +11,7 @@
     // "paths": {
     //   "*": ["./typings/*"]
     // },
-    "lib": ["esnext"],
+    "lib": ["esnext", "dom"],
     "module": "commonjs"
   },
   "include": ["./src/**/*.ts", "./src/**/*.tsx"]
