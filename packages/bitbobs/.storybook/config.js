@@ -1,16 +1,15 @@
-import { configure, addDecorator } from "@storybook/react";
-import { setOptions, withOptions } from "@storybook/addon-options";
+import { addParameters, configure } from "@storybook/react";
 
-addDecorator(
-  withOptions({
-    name: "cryptuff/bitbobs"
-  })
-);
-
-// automatically import all files ending in *.stories.js
-const req = require.context("../src", true, /.stor(y|ies).(jsx?|tsx?)$/);
 function loadStories() {
+  // automatically import all files ending in *.stories.js
+  const req = require.context("../src", true, /.stor(y|ies).(jsx?|tsx?)$/);
   req.keys().forEach(filename => req(filename));
 }
+
+addParameters({
+  options: {
+    name: "cryptuff/bitbobs",
+  },
+});
 
 configure(loadStories, module);
